@@ -1,0 +1,24 @@
+# Системные файлы macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Системные файлы Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Исходные материалы (макеты, промпты, скриншоты) — не попадают в репозиторий
+uploads/
+
+# Временные файлы
+*.tmp
+*.log
