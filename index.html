@@ -1,0 +1,2171 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Brain · AI-асистент для ресторатора</title>
+<meta name="description" content="AI-асистент для ресторатора. Ваша права рука. Дуже розумна й дуже надійна."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#F7F8FA;
+    --panel:#FFFFFF;
+    --ink:#0F1B2D;        /* deep navy from sidebar */
+    --ink-2:#1E2A3F;
+    --muted:#5C6B82;
+    --muted-2:#8A97AB;
+    --line:#E6EAF0;
+    --line-2:#D3DAE5;
+    --green:#16A34A;       /* app green */
+    --green-2:#22C55E;
+    --green-soft:#E9F7EF;
+    --green-soft-2:#DCF4E4;
+    --red-soft:#FDECEC;
+    --amber-soft:#FDF4E3;
+    --blue-soft:#E8EEF7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  body{
+    font-family:"Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-size:16px; line-height:1.55;
+    letter-spacing:-0.005em;
+  }
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit}
+  img,svg{display:block; max-width:100%}
+
+  .wrap{max-width:1200px; margin:0 auto; padding:0 32px;}
+  @media (max-width:900px){ .wrap{padding:0 24px} }
+  @media (max-width:500px){ .wrap{padding:0 18px} }
+
+  /* ============ NAV ============ */
+  .nav{
+    position:sticky; top:0; z-index:40;
+    background: rgba(247,248,250,.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; height:68px;}
+  .logo{display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; color:var(--ink);}
+  .logo-mark{
+    width:30px; height:30px; border-radius:9px;
+    background: var(--ink);
+    display:grid; place-items:center;
+  }
+  .logo-mark svg{width:18px; height:18px;}
+  /* Language picker — globe + dropdown */
+  .lang{
+    position:relative; font-family:inherit;
+  }
+  .lang-trigger{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--panel); border:1px solid var(--line);
+    padding:8px 12px; border-radius:10px; cursor:pointer;
+    font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.04em;
+    color:var(--ink); transition:.15s;
+  }
+  .lang-trigger:hover{ border-color:#0F1B2D; }
+  .lang-trigger svg{ width:14px; height:14px; opacity:.7; }
+  .lang-trigger .chev{ width:10px; height:10px; opacity:.5; transition:transform .2s; }
+  .lang.open .lang-trigger .chev{ transform:rotate(180deg); }
+  .lang-flag{ font-size:14px; line-height:1; }
+  .lang-menu{
+    position:absolute; top:calc(100% + 6px); right:0;
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    box-shadow:0 8px 24px rgba(15,27,45,0.08);
+    padding:4px; min-width:170px;
+    opacity:0; pointer-events:none; transform:translateY(-4px);
+    transition:opacity .15s, transform .15s;
+    z-index:50;
+  }
+  .lang.open .lang-menu{ opacity:1; pointer-events:auto; transform:translateY(0); }
+  .lang-menu button{
+    display:flex; align-items:center; gap:10px; width:100%;
+    border:0; background:transparent; padding:9px 12px; cursor:pointer;
+    color:var(--ink); font-family:inherit; font-size:13px; font-weight:600;
+    border-radius:7px; text-align:left; letter-spacing:.01em;
+  }
+  .lang-menu button:hover{ background:var(--panel); }
+  .lang-menu button.on{ background:var(--ink); color:#fff; }
+  .lang-menu .lang-code{ margin-left:auto; font-size:11px; opacity:.55; letter-spacing:.08em; }
+  .lang-menu button.on .lang-code{ opacity:.7; }
+
+  /* ============ TYPOGRAPHY ============ */
+  h1,h2,h3,h4{
+    font-family:"Inter", sans-serif; font-weight:700;
+    letter-spacing:-0.025em; margin:0; color:var(--ink);
+    text-wrap:balance;
+  }
+  h1.hero-h1{
+    font-size: clamp(40px, 5.2vw, 72px);
+    line-height:1.04; font-weight:800; letter-spacing:-0.03em;
+  }
+  h2.section-h{
+    font-size: clamp(30px, 3.6vw, 46px);
+    line-height:1.1; font-weight:700;
+  }
+  h3{ font-size:20px; line-height:1.25; font-weight:700; }
+  h4{ font-size:17px; line-height:1.3; font-weight:600; }
+  p{margin:0}
+
+  .eyebrow{
+    font-size:12px; font-weight:600;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--green);
+    display:inline-flex; align-items:center; gap:10px;
+    padding:6px 12px; background:var(--green-soft); border-radius:999px;
+  }
+  .eyebrow::before{
+    content:""; width:6px; height:6px; background:var(--green); border-radius:999px;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:14px 22px; border-radius:10px;
+    background:var(--ink); color:#fff; border:0; cursor:pointer;
+    font-family:inherit; font-size:15px; font-weight:600;
+    transition:.15s;
+  }
+  .btn:hover{ background:#060D19; transform:translateY(-1px); }
+  .btn .arrow{ transition:transform .15s;}
+  .btn:hover .arrow{ transform:translateX(3px);}
+  .btn-green{ background:var(--green);}
+  .btn-green:hover{ background:#107A38;}
+  .btn-ghost{
+    background:#fff; color:var(--ink); border:1px solid var(--line);
+  }
+  .btn-ghost:hover{ background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  .tag{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; border-radius:999px;
+    background:var(--green-soft); color:var(--green);
+    font-size:11px; font-weight:600; letter-spacing:.02em;
+  }
+  .tag-muted{background:var(--blue-soft); color:var(--muted);}
+  .tag-dark{background:var(--ink); color:#fff;}
+
+  /* ============ HERO ============ */
+  .hero{
+    padding: 72px 0 96px;
+    position:relative;
+  }
+  .hero .wrap{display:grid; grid-template-columns: 1.05fr 1fr; gap:56px; align-items:center;}
+  @media (max-width:1000px){ .hero .wrap{grid-template-columns:1fr; gap:48px} }
+  .hero-h2{
+    margin-top:24px;
+    font-size: clamp(18px, 1.9vw, 22px);
+    line-height:1.4; color:var(--muted); font-weight:500;
+    max-width:560px;
+  }
+  .hero-p{margin-top:14px; font-size:16px; color:var(--muted); line-height:1.6; max-width:520px;}
+  .hero-actions{display:flex; gap:12px; margin-top:36px; flex-wrap:wrap;}
+
+  .hero-trust{
+    display:flex; gap:28px; margin-top:36px; flex-wrap:wrap;
+    padding-top:24px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:13px;
+  }
+  .hero-trust b{color:var(--ink); font-weight:700; font-size:20px; display:block;}
+
+  /* HERO BRAIN ILLUSTRATION */
+  .brain-scene{
+    position:relative;
+    aspect-ratio: 1/1;
+    max-width:520px;
+    margin-left:auto;
+    width:100%;
+  }
+  .brain-scene svg{width:100%; height:100%;}
+  @media (max-width:1000px){ .brain-scene{margin:0 auto;} }
+
+  /* ============ SECTION ============ */
+  section{padding:96px 0; position:relative;}
+  @media (max-width:768px){ section{padding:72px 0} }
+
+  .section-head{ margin-bottom:48px; }
+  .section-num{
+    font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted-2);
+    margin-bottom:18px;
+  }
+  .lede{font-size:17px; line-height:1.6; color:var(--muted); max-width:720px; margin-top:14px;}
+
+  /* ============ BLOCK 2 — level ============ */
+  .strike-row{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:6px 14px; border-radius:999px;
+    background:#fff; border:1px solid var(--line);
+    font-size:14px; color:var(--muted); margin-bottom:20px;
+    font-weight:500;
+  }
+  .strike-row s{text-decoration:line-through;}
+  .strike-row .rarr{color:var(--muted-2);}
+  .strike-row .new{color:var(--green); font-weight:700;}
+
+  /* Brain + Foundation illustration — THE centerpiece */
+  .brain-base{
+    margin-top:56px;
+    display:flex; justify-content:center;
+    position:relative;
+  }
+  .brain-base svg{
+    width:100%; max-width:980px;
+    height:auto;
+  }
+
+  /* ============ BLOCK 3 — rungs ============ */
+  .rungs{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:16px;
+    margin-top:8px;
+  }
+  @media (max-width:900px){ .rungs{grid-template-columns: 1fr 1fr; gap:12px;} }
+  @media (max-width:560px){ .rungs{grid-template-columns: 1fr;} }
+  .rung{
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding: 24px 22px; position:relative;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .rung:hover{ box-shadow: 0 6px 24px -12px rgba(15,27,45,.15); transform:translateY(-2px);}
+  .rung .rn{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-2);
+    margin-bottom:14px;
+  }
+  .rung .rn b{
+    display:grid; place-items:center; width:24px; height:24px;
+    background:var(--green-soft); color:var(--green); border-radius:8px;
+    font-size:12px; font-weight:700;
+  }
+  .rung:nth-child(4) .rn b{background:var(--ink); color:#fff;}
+  .rung h4{margin-bottom:10px; font-size:17px;}
+  .rung .body{font-size:14.5px; line-height:1.55; color:var(--muted); }
+  .rung:nth-child(4){ background:var(--ink); border-color:var(--ink); color:#fff;}
+  .rung:nth-child(4) h4{color:#fff;}
+  .rung:nth-child(4) .body{color:#B8C5D9;}
+  .rung:nth-child(4) .rn{color:#8FA0BB;}
+  .rung-closer{
+    margin-top:40px; font-size:20px; font-weight:600; line-height:1.4;
+    max-width:720px; color:var(--ink); letter-spacing:-0.015em;
+  }
+  .rung-closer em{font-style:normal; color:var(--green);}
+
+  /* ============ BLOCK 4 — mirror ============ */
+  .mirror-grid{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;
+    margin-top:8px;
+  }
+  @media (max-width:900px){ .mirror-grid{grid-template-columns: repeat(2,1fr)} }
+  @media (max-width:600px){ .mirror-grid{grid-template-columns: 1fr} }
+  .q-card{
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:24px 22px; min-height:140px;
+    display:flex; flex-direction:column; gap:14px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .q-card:hover{transform:translateY(-2px); box-shadow: 0 6px 24px -12px rgba(15,27,45,.12);}
+  .q-card .ic{
+    width:36px; height:36px; border-radius:10px; background:var(--blue-soft);
+    display:grid; place-items:center; color:var(--ink);
+  }
+  .q-card:nth-child(2n) .ic{background:var(--green-soft); color:var(--green);}
+  .q-card:nth-child(3n) .ic{background:var(--amber-soft); color:#B45A0B;}
+  .q-card .q-text{ font-size:16px; line-height:1.45; font-weight:500; color:var(--ink);}
+  .mirror-closer{
+    margin-top:36px;
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:22px 24px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    font-size:17px; color:var(--muted);
+  }
+  .mirror-closer b{color:var(--ink); font-weight:700;}
+
+  /* ============ BLOCK 5 — video ============ */
+  .video-card{
+    margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:20px;
+    padding:20px;
+  }
+  .video-wrap{
+    position:relative; aspect-ratio: 16/9;
+    background:#0F1B2D; border-radius:14px; overflow:hidden;
+  }
+  .video-wrap iframe{position:absolute; inset:0; width:100%; height:100%; border:0;}
+  .video-placeholder{
+    position:absolute; inset:0; display:grid; place-items:center;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(34,197,94,.18), transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(59,130,246,.15), transparent 50%),
+      #0F1B2D;
+  }
+  .play{
+    width:84px; height:84px; border-radius:50%;
+    background:#fff; display:grid; place-items:center;
+    cursor:pointer; transition:.15s;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,.5);
+  }
+  .play:hover{transform:scale(1.06);}
+  .play svg{margin-left:4px;}
+  .video-meta{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 14px 6px 2px; color:var(--muted); font-size:13px;
+  }
+
+  /* ============ BLOCK 6 — roles ============ */
+  .roles6{
+    display:grid; grid-template-columns: repeat(3,1fr); gap:16px;
+    margin-top:8px;
+  }
+  @media (max-width:960px){ .roles6{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:640px){ .roles6{grid-template-columns:1fr} }
+  .role-card{
+    background:#fff; border:1px solid var(--line); border-radius:18px;
+    padding:26px 24px 28px;
+    display:flex; flex-direction:column; gap:14px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .role-card:hover{transform:translateY(-2px); box-shadow:0 10px 30px -15px rgba(15,27,45,.2);}
+  .role-head{display:flex; justify-content:space-between; align-items:center;}
+  .role-num{
+    font-size:11px; font-weight:700; letter-spacing:.1em; color:var(--muted-2);
+  }
+  .role-ic{
+    width:40px; height:40px; border-radius:12px;
+    background:var(--green-soft); color:var(--green);
+    display:grid; place-items:center;
+  }
+  .role-card h3{font-size:19px; line-height:1.25;}
+  .role-card .blurb{font-size:14.5px; color:var(--muted); line-height:1.55;}
+  .role-card .quote{
+    margin:0; padding:14px 16px;
+    background:var(--bg); border-radius:12px;
+    font-size:13.5px; line-height:1.55; color:var(--ink-2);
+    border-left:3px solid var(--green);
+  }
+  .roles-closer{
+    margin-top:40px; padding:22px 24px;
+    background:var(--ink); color:#fff; border-radius:16px;
+    font-size:18px; line-height:1.5; font-weight:500;
+  }
+  .roles-closer b{color:var(--green-2);}
+
+  /* ============ BLOCK 7 — price ============ */
+  .price-card{
+    margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:20px;
+    overflow:hidden;
+    display:grid; grid-template-columns: 1.1fr 1fr;
+  }
+  @media (max-width:820px){ .price-card{grid-template-columns:1fr} }
+  .price-left{
+    padding:48px 44px;
+    display:flex; flex-direction:column; justify-content:center; gap:16px;
+    border-right:1px solid var(--line);
+  }
+  @media (max-width:820px){ .price-left{border-right:0; border-bottom:1px solid var(--line); padding:36px 28px;} }
+  .price-left .plabel{
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-2);
+  }
+  .price-main{
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .price-main .p{font-size:clamp(60px, 7vw, 88px); font-weight:800; letter-spacing:-0.04em; line-height:.95; color:var(--ink);}
+  .price-main .u{font-size:16px; color:var(--muted);}
+  .price-desc{font-size:16px; line-height:1.6; color:var(--muted); max-width:440px;}
+
+  .price-right{
+    padding:44px;
+    background: linear-gradient(160deg, #0F1B2D 0%, #1A2D4D 100%);
+    color:#fff; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:center; gap:10px;
+  }
+  @media (max-width:820px){ .price-right{padding:36px 28px} }
+  .price-right::before{
+    content:""; position:absolute; top:-40%; right:-20%;
+    width:380px; height:380px; border-radius:50%;
+    background: radial-gradient(circle, rgba(34,197,94,.25), transparent 70%);
+    pointer-events:none;
+  }
+  .price-right .discount-tag{
+    align-self:flex-start;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 14px; border-radius:999px;
+    background:var(--green); color:#fff;
+    font-size:12px; font-weight:700; letter-spacing:.06em;
+    margin-bottom:6px;
+  }
+  .price-right h3{
+    color:#fff; font-size: clamp(26px, 3vw, 34px); line-height:1.1;
+    letter-spacing:-0.02em;
+  }
+  .price-compare{
+    margin-top:14px; display:flex; align-items:baseline; gap:16px;
+  }
+  .price-compare .old{
+    font-size:28px; color:#8FA0BB; text-decoration:line-through; font-weight:500;
+  }
+  .price-compare .arr{color:#8FA0BB; font-size:20px;}
+  .price-compare .now{
+    font-size:52px; font-weight:800; letter-spacing:-0.03em; color:#fff;
+    display:inline-flex; align-items:baseline; gap:6px;
+  }
+  .price-compare .now span{font-size:14px; font-weight:500; color:#B8C5D9;}
+  .price-note{ font-size:14px; color:#B8C5D9; margin-top:8px; line-height:1.5;}
+
+  /* ============ BLOCK 8 — launch ============ */
+  .launch-grid{
+    display:grid; grid-template-columns: 1.1fr .9fr; gap:24px; margin-top:8px;
+  }
+  @media (max-width:900px){ .launch-grid{grid-template-columns:1fr;} }
+  .launch-main{
+    background:#fff; border:1px solid var(--line); border-radius:18px; padding:32px 30px;
+  }
+  .launch-main p{font-size:16px; color:var(--muted); line-height:1.6;}
+  .launch-main p + p{margin-top:12px;}
+  .ask-list{
+    list-style:none; margin:20px 0 0; padding:0;
+  }
+  .ask-list li{
+    display:flex; align-items:center; gap:14px;
+    padding:12px 14px; border-radius:10px; background:var(--bg);
+    font-size:14.5px; color:var(--ink); margin-bottom:6px;
+  }
+  .ask-list .n{
+    width:26px; height:26px; border-radius:8px;
+    background:#fff; border:1px solid var(--line);
+    display:grid; place-items:center;
+    font-size:11px; font-weight:700; color:var(--muted); flex-shrink:0;
+  }
+  .ask-list li.done .n{ background:var(--green); color:#fff; border-color:var(--green);}
+  .workstation{
+    background:linear-gradient(160deg, var(--ink) 0%, #1A2D4D 100%);
+    color:#fff; border-radius:18px; padding:30px 28px;
+    position:relative; overflow:hidden;
+  }
+  .workstation::after{
+    content:""; position:absolute; bottom:-60px; right:-60px; width:220px; height:220px; border-radius:50%;
+    background: radial-gradient(circle, rgba(34,197,94,.2), transparent 70%); pointer-events:none;
+  }
+  .workstation h3{color:#fff; font-size:22px;}
+  .workstation p{font-size:14.5px; color:#B8C5D9; line-height:1.55; margin-top:12px;}
+  .workstation .ws-big{
+    margin-top:22px; padding-top:18px; border-top:1px solid rgba(255,255,255,.12);
+    font-size:22px; font-weight:700; letter-spacing:-0.02em; color:#fff;
+  }
+  .workstation .ws-big em{color:var(--green-2); font-style:normal;}
+
+  /* ============ BLOCK 9 — FAQ ============ */
+  .faq{
+    margin-top:8px; background:#fff; border:1px solid var(--line); border-radius:18px;
+    overflow:hidden;
+  }
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-item:last-child{border-bottom:0;}
+  .faq-q{
+    all:unset; display:flex; width:100%; align-items:center; justify-content:space-between; gap:20px;
+    padding:22px 26px; cursor:pointer;
+    font-size:17px; font-weight:600; line-height:1.35; color:var(--ink);
+    transition: background .15s;
+  }
+  .faq-q:hover{background:var(--bg);}
+  .faq-q .qn{
+    font-size:12px; font-weight:700; color:var(--muted-2); letter-spacing:.04em;
+    margin-right:14px;
+  }
+  .faq-q .qtext{flex:1;}
+  .faq-q .plus{
+    width:30px; height:30px; flex-shrink:0; border-radius:50%;
+    background:var(--bg); display:grid; place-items:center;
+    color:var(--muted); position:relative; transition:.2s;
+  }
+  .faq-q .plus::before, .faq-q .plus::after{
+    content:""; position:absolute; background:currentColor;
+  }
+  .faq-q .plus::before{ width:12px; height:1.5px;}
+  .faq-q .plus::after{ width:1.5px; height:12px; transition:transform .25s;}
+  .faq-item.open .faq-q .plus{background:var(--green); color:#fff;}
+  .faq-item.open .faq-q .plus::after{ transform:scaleY(0);}
+  .faq-a{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+  .faq-a-inner{padding: 0 26px 24px 62px; color:var(--muted); font-size:15px; line-height:1.65; max-width:820px;}
+  @media (max-width:600px){ .faq-q{padding:18px 20px; font-size:15px;} .faq-a-inner{padding: 0 20px 22px 20px} .faq-q .qn{display:none;} }
+
+  /* ============ BLOCK 10 — roadmap ============ */
+  .roadmap{
+    display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:8px;
+  }
+  @media (max-width:900px){ .roadmap{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:600px){ .roadmap{grid-template-columns:1fr} }
+  .road-item{
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:24px 22px;
+    display:flex; flex-direction:column; gap:10px;
+    min-height:180px;
+  }
+  .road-item .rtag{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; border-radius:999px;
+    background:var(--amber-soft); color:#B45A0B;
+    font-size:11px; font-weight:700; letter-spacing:.04em;
+    align-self:flex-start;
+  }
+  .road-item h4{font-size:17px; line-height:1.25;}
+  .road-item p{font-size:14px; color:var(--muted); line-height:1.55; margin-top:auto;}
+  .road-closer{
+    margin-top:24px; padding:20px 24px;
+    background:var(--green-soft); border-radius:14px;
+    font-size:16px; color:var(--ink); font-weight:500;
+  }
+
+  /* ============ BLOCK 11 — about ============ */
+  .about{
+    margin-top:8px; background:linear-gradient(140deg, var(--ink) 0%, #1A2D4D 100%);
+    color:#fff; border-radius:22px;
+    padding:56px 52px; position:relative; overflow:hidden;
+  }
+  @media (max-width:768px){ .about{padding:40px 28px;} }
+  .about::before{
+    content:""; position:absolute; top:-120px; right:-120px; width:360px; height:360px; border-radius:50%;
+    background: radial-gradient(circle, rgba(34,197,94,.22), transparent 70%); pointer-events:none;
+  }
+  .about h2{color:#fff; max-width:760px;}
+  .about p{color:#B8C5D9; font-size:17px; line-height:1.6; max-width:760px; margin-top:16px;}
+  .about p.em{color:#fff; font-weight:500;}
+  .about-stats{
+    display:grid; grid-template-columns: repeat(3,1fr); gap:24px; margin-top:36px;
+    max-width:720px;
+  }
+  @media (max-width:600px){ .about-stats{grid-template-columns:1fr} }
+  .about-stat{ padding:20px 0 0; border-top:1px solid rgba(255,255,255,.12);}
+  .about-stat .big{font-size:34px; font-weight:800; letter-spacing:-0.03em; color:#fff;}
+  .about-stat .lbl{
+    font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#8FA0BB; margin-top:6px;
+  }
+
+  /* ============ BLOCK 12 — waitlist ============ */
+  .waitlist{
+    margin-top:8px; border-radius:22px; overflow:hidden;
+    display:grid; grid-template-columns: 1.05fr 1fr;
+    background:#fff; border:1px solid var(--line);
+  }
+  @media (max-width:820px){ .waitlist{grid-template-columns:1fr} }
+  .wl-left{
+    padding:48px 44px;
+    background: linear-gradient(160deg, var(--green) 0%, #0E8039 100%);
+    color:#fff; position:relative; overflow:hidden;
+  }
+  @media (max-width:820px){ .wl-left{padding:36px 28px} }
+  .wl-left::after{
+    content:""; position:absolute; bottom:-80px; left:-40px; width:280px; height:280px; border-radius:50%;
+    background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%); pointer-events:none;
+  }
+  .wl-left h3{color:#fff; font-size: clamp(26px,3.2vw,34px); line-height:1.1; font-weight:700; letter-spacing:-0.02em;}
+  .wl-left p{color:rgba(255,255,255,.9); font-size:16px; line-height:1.6; max-width:440px; margin-top:14px;}
+  .wl-offer{
+    display:inline-flex; align-items:center; gap:8px;
+    margin-top:22px; padding:8px 14px; border-radius:999px;
+    background:#fff; color:var(--green);
+    font-size:12px; font-weight:700; letter-spacing:.04em;
+  }
+  .wl-right{
+    padding: 48px 44px; display:flex; flex-direction:column; justify-content:center;
+  }
+  @media (max-width:820px){ .wl-right{padding:36px 28px} }
+  .wl-label{
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-2); margin-bottom:10px;
+  }
+  .form{
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .form input{
+    flex:1; min-width:180px;
+    border:1px solid var(--line); background:#fff; outline:none; border-radius:10px;
+    font-family:inherit; font-size:15px; padding:14px 16px; color:var(--ink);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .form input::placeholder{color:var(--muted-2);}
+  .form input:focus{border-color:var(--green); box-shadow:0 0 0 3px var(--green-soft-2);}
+  .form button{
+    border:0; background:var(--ink); color:#fff; border-radius:10px;
+    padding: 14px 22px; font-size:14.5px; font-weight:600; cursor:pointer;
+    font-family:inherit; transition: background .15s;
+  }
+  .form button:hover{background:var(--green);}
+  .thanks{
+    margin-top:14px; font-size:14px; color:var(--green); font-weight:600;
+    display:flex; align-items:center; gap:10px;
+  }
+  .thanks svg{width:18px; height:18px;}
+  .wl-note{
+    margin-top:16px; font-size:12.5px; color:var(--muted-2); line-height:1.55;
+  }
+
+  /* ============ FOOTER ============ */
+  footer{padding:40px 0 56px; color:var(--muted-2); font-size:13px;}
+  footer .finner{display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; align-items:center;}
+  footer a:hover{color:var(--ink);}
+
+  /* ============ CHAT FAB ============ */
+  .fab{
+    position:fixed; right:22px; bottom:22px; z-index:50;
+    display:flex; align-items:center; gap:10px;
+    padding:12px 18px; border-radius:999px;
+    background:var(--ink); color:#fff; border:0; cursor:pointer;
+    font-family:inherit; font-size:14px; font-weight:600;
+    box-shadow: 0 10px 30px -10px rgba(15,27,45,.45);
+    transition:.15s;
+  }
+  .fab:hover{ background:#1E2D47; transform:translateY(-1px); }
+  .fab .dot{width:8px; height:8px; border-radius:50%; background:var(--green-2); box-shadow:0 0 0 0 rgba(34,197,94,.6); animation: dot 1.6s infinite;}
+  @keyframes dot{ 0%{box-shadow:0 0 0 0 rgba(34,197,94,.5);} 70%{box-shadow:0 0 0 10px rgba(34,197,94,0);} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0);} }
+  .fab .small{display:block; font-size:11px; font-weight:500; color:#B8C5D9;}
+  @media (max-width:640px){ .fab{padding:10px 14px; font-size:13px; right:14px; bottom:14px;} .fab .small{display:none} }
+  .fab-tip{
+    position:fixed; right:22px; bottom:76px; z-index:50;
+    background:var(--ink); color:#fff; border-radius:10px;
+    padding:10px 14px; font-size:13px;
+    opacity:0; transform:translateY(6px); pointer-events:none;
+    transition:.2s; white-space:nowrap;
+    box-shadow:0 10px 30px -10px rgba(0,0,0,.3);
+  }
+  .fab-tip.show{opacity:1; transform:translateY(0);}
+
+  /* Reveal */
+  .reveal{opacity:0; transform:translateY(10px); transition:opacity .6s, transform .6s;}
+  .reveal.in{opacity:1; transform:none;}
+  @media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none;}}
+
+  /* Brain SVG animation */
+  @keyframes flow {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+  }
+  .arrow-path{
+    stroke-dasharray: 6 4;
+    animation: flow 2.4s linear infinite;
+  }
+  @keyframes softPulse { 0%,100%{opacity:.9;} 50%{opacity:.55;} }
+  .brain-pulse{animation: softPulse 3s ease-in-out infinite;}
+
+  /* ============================================
+     MOBILE OPTIMIZATIONS — refined for phones
+     ============================================ */
+  /* Show mobile-only text replacement for hero / brain illustration */
+  .mobile-only{ display:none; }
+
+  /* ≤768px: tighten everything for phones */
+  @media (max-width: 768px){
+    /* Header */
+    .nav-inner{ height:60px; }
+    .logo{ font-size:15px; gap:8px; }
+    .logo-mark{ width:28px; height:28px; }
+    .lang-trigger{ padding:7px 10px; font-size:11px; }
+    .lang-trigger #lang-current-label{ display:none; } /* keep flag + globe + chev only */
+    .lang-menu{ min-width:200px; }
+
+    /* Section spacing */
+    section{ padding:56px 0; }
+    .section-head{ margin-bottom:32px; }
+    .section-num{ font-size:11px; }
+
+    /* Typography breathing room */
+    h1.hero-h1{ font-size:36px; line-height:1.08; }
+    .hero-h2{ font-size:18px; margin-top:18px; }
+    .hero-p{ font-size:15px; }
+    h2.section-h{ font-size:28px; line-height:1.15; }
+    .lede{ font-size:16px; }
+
+    /* HIDE the giant hero Shiva SVG on phones — it's not readable at this size */
+    .brain-scene{ display:none !important; }
+
+    /* HIDE the giant brain+foundation SVG in block 2 — replace with mobile list */
+    .brain-base{ display:none !important; }
+    .brain-mobile{ display:block !important; }
+
+    /* Hero buttons stretch full width and stack */
+    .hero-actions{ gap:10px; margin-top:28px; }
+    .hero-actions .btn{ width:100%; justify-content:center; padding:16px 18px; }
+
+    /* Hero trust strip: stack to single column */
+    .hero-trust{
+      display:grid; grid-template-columns:1fr; gap:14px;
+      margin-top:32px; padding-top:24px; border-top:1px solid var(--line);
+    }
+    .hero-trust div{ display:flex; align-items:baseline; gap:10px; }
+    .hero-trust b{ font-size:18px; }
+
+    /* Section heads */
+    .section-h{ letter-spacing:-0.02em; }
+
+    /* Cards & rungs — more vertical air */
+    .rung{ padding:22px 20px; border-radius:14px; }
+    .rung .rn b{ font-size:18px; }
+    .q-card{ padding:20px 18px; border-radius:14px; }
+    .role-card{ padding:24px 22px; border-radius:14px; }
+    .road-item{ padding:22px 20px; border-radius:14px; }
+
+    /* Pricing card */
+    .price-left{ padding:32px 24px; }
+    .price-right{ padding:28px 24px; }
+    .price-main .p{ font-size:64px; }
+
+    /* Launch grid */
+    .launch-main{ padding:26px 22px; border-radius:14px; }
+
+    /* About */
+    .about{ padding:36px 24px; border-radius:18px; }
+    .about p{ font-size:15px; }
+
+    /* Waitlist */
+    .wl-left{ padding:32px 24px; }
+    .wl-right{ padding:28px 24px; }
+    .form{ flex-direction:column; }
+    .form input{ width:100%; padding:14px 14px; }
+    .form .btn{ width:100%; justify-content:center; }
+
+    /* FAQ */
+    .faq-q{ padding:18px 18px; font-size:15px; gap:14px; }
+    .faq-q .qn{ display:none; }
+    .faq-a-inner{ padding:0 18px 22px 18px; font-size:15px; }
+    .plus{ width:18px; height:18px; flex-shrink:0; }
+
+    /* FAB */
+    .fab{ right:14px; bottom:14px; }
+  }
+
+  /* ≤480px: tiny phones (iPhone SE, small Androids) */
+  @media (max-width: 480px){
+    .wrap{ padding:0 16px; }
+    section{ padding:48px 0; }
+    .nav-inner{ height:56px; }
+    h1.hero-h1{ font-size:32px; }
+    .hero-h2{ font-size:17px; }
+    h2.section-h{ font-size:24px; }
+    .price-main .p{ font-size:54px; }
+    .price-left .plabel,
+    .wl-label{ font-size:11px; }
+    .about{ padding:30px 20px; }
+    .about-stat .big{ font-size:28px; }
+    .rung-closer{ font-size:17px; }
+    .b8-big{ font-size:32px; }
+
+    /* Tighter inline text in cards */
+    .role-card{ padding:20px 18px; }
+    .rung{ padding:20px 18px; }
+    .q-card{ padding:18px 16px; }
+    .road-item{ padding:20px 18px; }
+  }
+
+  /* ====== Mobile-only Block 2 replacement (hidden by default) ====== */
+  .brain-mobile{ display:none; margin-top:8px; }
+  .brain-mobile .bm-layer{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:24px 22px; margin-top:14px;
+  }
+  .brain-mobile .bm-eyebrow{
+    font-size:11px; font-weight:800; letter-spacing:.16em;
+    color:var(--green); text-transform:uppercase;
+  }
+  .brain-mobile .bm-title{
+    font-size:20px; font-weight:700; color:var(--ink);
+    letter-spacing:-0.015em; margin-top:6px; line-height:1.25;
+  }
+  .brain-mobile .bm-roles{
+    list-style:none; padding:0; margin:18px 0 0; display:flex;
+    flex-direction:column; gap:10px;
+  }
+  .brain-mobile .bm-role{
+    display:flex; align-items:baseline; gap:10px;
+    padding:12px 14px; background:var(--panel);
+    border:1px solid var(--line); border-radius:10px;
+  }
+  .brain-mobile .bm-verb{
+    font-size:11px; font-weight:800; letter-spacing:.08em;
+    color:var(--green); text-transform:uppercase; flex-shrink:0;
+    min-width:56px;
+  }
+  .brain-mobile .bm-who{
+    font-size:15px; font-weight:600; color:var(--ink);
+  }
+  .brain-mobile .bm-foundation{
+    background:#D7DCE3; border:2px solid #7E8696; border-radius:0;
+    padding:22px 20px; margin-top:14px;
+  }
+  .brain-mobile .bm-foundation .bm-eyebrow{ color:#4A5566; }
+  .brain-mobile .bm-foundation .bm-title{ color:var(--ink); }
+  .brain-mobile .bm-chips{
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:14px;
+  }
+  .brain-mobile .bm-chip{
+    background:#EEF1F5; border:1px solid #7E8696;
+    padding:8px 12px; font-size:13px; font-weight:600; color:var(--ink);
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark">
+        <!-- leaf/brain mark matching app -->
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 3c-3 0-5 2-5 5 0 1 .3 2 .8 2.7-.5.7-.8 1.6-.8 2.6 0 2.5 2 4.7 4.5 4.7h.5v-4" stroke="#22C55E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 3c3 0 5 2 5 5 0 1-.3 2-.8 2.7.5.7.8 1.6.8 2.6 0 2.5-2 4.7-4.5 4.7H12v-4" stroke="#22C55E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span>Brain</span>
+    </a>
+    <div class="lang" id="lang-picker">
+      <button class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
+        <span class="lang-flag" id="lang-current-flag">🇺🇦</span>
+        <span id="lang-current-label">UA</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="lang-menu" role="listbox">
+        <button data-lang="uk" class="on"><span class="lang-flag">🇺🇦</span><span>Українська</span><span class="lang-code">UA</span></button>
+        <button data-lang="en"><span class="lang-flag">🇬🇧</span><span>English</span><span class="lang-code">EN</span></button>
+        <button data-lang="de"><span class="lang-flag">🇩🇪</span><span>Deutsch</span><span class="lang-code">DE</span></button>
+        <button data-lang="pl"><span class="lang-flag">🇵🇱</span><span>Polski</span><span class="lang-code">PL</span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- BLOCK 1 — HERO -->
+<section class="hero" id="hero">
+  <div class="wrap">
+    <div class="hero-text">
+      <span class="eyebrow" data-i18n="hero.eyebrow">Для власників кафе та ресторанів</span>
+      <h1 class="hero-h1" style="margin-top:22px"><span data-i18n="hero.h1">AI-асистент для ресторатора</span></h1>
+      <p class="hero-h2" data-i18n="hero.h2">Ваша права рука. Дуже розумна й дуже надійна.</p>
+      <p class="hero-p" data-i18n="hero.p1">Працює 24/7. Знає про ваш ресторан усе — і допомагає керувати.</p>
+      <p class="hero-p" data-i18n="hero.p2">Підказує персоналу в моменті. Складні ситуації розбирає сам. Вам приносить тільки головне.</p>
+      <div class="hero-actions">
+        <button class="btn btn-green" onclick="document.getElementById('video').scrollIntoView({behavior:'smooth'})">
+          <span data-i18n="hero.cta">Подивіться, як він працює</span>
+          <span class="arrow">→</span>
+        </button>
+        <button class="btn btn-ghost" onclick="document.getElementById('waitlist').scrollIntoView({behavior:'smooth'})">
+          <span data-i18n="hero.cta2">Записатися</span>
+        </button>
+      </div>
+      <div class="hero-trust">
+        <div><b data-i18n="hero.t1a">24/7</b><span data-i18n="hero.t1b">завжди на зміні</span></div>
+        <div><b data-i18n="hero.t2a">6</b><span data-i18n="hero.t2b">ролей в одному</span></div>
+        <div><b data-i18n="hero.t3a">17 років</b><span data-i18n="hero.t3b">у ресторанному софті</span></div>
+      </div>
+    </div>
+    <div class="brain-scene">
+      <!-- Hero: Shiva-inspired figure with 6 arms holding role labels, AI on forehead -->
+      <svg viewBox="0 0 560 620" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <radialGradient id="heroGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#22C55E" stop-opacity="0.18"/>
+            <stop offset="60%" stop-color="#22C55E" stop-opacity="0.05"/>
+            <stop offset="100%" stop-color="#22C55E" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="haloGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#22C55E" stop-opacity="0"/>
+            <stop offset="78%" stop-color="#22C55E" stop-opacity="0.0"/>
+            <stop offset="92%" stop-color="#22C55E" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#22C55E" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- soft background glow -->
+        <circle cx="280" cy="290" r="280" fill="url(#heroGlow)"/>
+        <!-- halo ring behind head -->
+        <circle cx="280" cy="180" r="105" fill="url(#haloGrad)"/>
+        <circle cx="280" cy="180" r="92" fill="none" stroke="#16A34A" stroke-width="1" stroke-dasharray="2 5" opacity="0.55"/>
+
+        <!-- ============== SHIVA FIGURE ============== -->
+        <g stroke="#0F1B2D" stroke-linecap="round" stroke-linejoin="round" fill="#FFFFFF">
+
+          <!-- Lotus pedestal under the figure -->
+          <g transform="translate(280,540)" fill="#E9F7EF" stroke="#16A34A" stroke-width="1.6">
+            <ellipse cx="0" cy="14" rx="140" ry="14"/>
+            <path d="M -130 8 Q -110 -22 -85 -8 Q -70 -28 -50 -10 Q -30 -32 -10 -10 Q 0 -36 10 -10 Q 30 -32 50 -10 Q 70 -28 85 -8 Q 110 -22 130 8 Z" fill="#DCF4E4"/>
+            <path d="M -85 -8 Q -70 -2 -50 -10" fill="none"/>
+            <path d="M -10 -10 Q 0 -2 10 -10" fill="none"/>
+            <path d="M 50 -10 Q 70 -2 85 -8" fill="none"/>
+          </g>
+
+          <!-- Torso (lotus seated, slim) -->
+          <path d="M 240 350 Q 230 410 245 470 Q 280 490 315 470 Q 330 410 320 350 Z"
+                fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2"/>
+
+          <!-- Folded legs (lotus pose) hint, in front of pedestal -->
+          <path d="M 200 500 Q 230 480 280 478 Q 330 480 360 500 Q 360 520 280 522 Q 200 520 200 500 Z"
+                fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2"/>
+          <path d="M 230 498 Q 280 488 330 498" stroke="#0F1B2D" stroke-width="1.3" fill="none"/>
+
+          <!-- Sash/dhoti detail -->
+          <path d="M 248 460 L 280 478 L 312 460" stroke="#16A34A" stroke-width="2" fill="none"/>
+
+          <!-- Neck -->
+          <path d="M 268 240 L 268 270 L 292 270 L 292 240 Z" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2"/>
+
+          <!-- Head / face -->
+          <ellipse cx="280" cy="190" rx="58" ry="68" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2"/>
+
+          <!-- Hair / topknot (jata) -->
+          <path d="M 222 168 Q 210 110 250 100 Q 250 80 280 78 Q 310 80 310 100 Q 350 110 338 168
+                   Q 330 150 320 156 Q 322 138 305 134 Q 308 118 280 116 Q 252 118 255 134 Q 238 138 240 156 Q 230 150 222 168 Z"
+                fill="#0F1B2D" stroke="#0F1B2D" stroke-width="1.5"/>
+          <!-- crescent moon on hair -->
+          <path d="M 252 100 Q 244 92 252 84 Q 260 92 252 100 Z" fill="#FFFFFF" stroke="#FFFFFF"/>
+
+          <!-- Forehead "AI" mark (third-eye position) -->
+          <g>
+            <ellipse cx="280" cy="158" rx="20" ry="13" fill="#16A34A" stroke="#0F1B2D" stroke-width="1.6"/>
+            <text x="280" y="163" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#FFFFFF" letter-spacing="0.5" stroke="none">AI</text>
+          </g>
+
+          <!-- Eyes (closed, serene) -->
+          <path d="M 256 196 Q 264 192 272 196" stroke="#0F1B2D" stroke-width="1.8" fill="none"/>
+          <path d="M 288 196 Q 296 192 304 196" stroke="#0F1B2D" stroke-width="1.8" fill="none"/>
+          <!-- Nose -->
+          <path d="M 280 200 L 278 218 L 283 222" stroke="#0F1B2D" stroke-width="1.4" fill="none"/>
+          <!-- Mouth -->
+          <path d="M 270 232 Q 280 236 290 232" stroke="#0F1B2D" stroke-width="1.5" fill="none"/>
+          <!-- Earrings -->
+          <circle cx="222" cy="200" r="4" fill="#16A34A" stroke="#0F1B2D" stroke-width="1.2"/>
+          <circle cx="338" cy="200" r="4" fill="#16A34A" stroke="#0F1B2D" stroke-width="1.2"/>
+
+          <!-- Necklace -->
+          <path d="M 250 282 Q 280 298 310 282" stroke="#16A34A" stroke-width="2" fill="none"/>
+          <circle cx="280" cy="294" r="3.5" fill="#16A34A" stroke="#0F1B2D" stroke-width="1"/>
+
+          <!-- ===== 6 ARMS ===== -->
+          <!-- Upper-left arm (to "Server") -->
+          <path d="M 240 320 Q 180 280 120 250 Q 96 240 80 240" stroke="#0F1B2D" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M 240 320 Q 180 280 120 250 Q 96 240 80 240" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Mid-left arm (to "Bartender") -->
+          <path d="M 245 360 Q 175 365 110 380 Q 90 384 75 384" stroke="#0F1B2D" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M 245 360 Q 175 365 110 380 Q 90 384 75 384" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Lower-left arm (to "Manager") -->
+          <path d="M 252 410 Q 195 445 130 470 Q 105 478 88 478" stroke="#0F1B2D" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M 252 410 Q 195 445 130 470 Q 105 478 88 478" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+          <!-- Upper-right arm (to "Cook") -->
+          <path d="M 320 320 Q 380 280 440 250 Q 464 240 480 240" stroke="#0F1B2D" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M 320 320 Q 380 280 440 250 Q 464 240 480 240" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Mid-right arm (to "Host") -->
+          <path d="M 315 360 Q 385 365 450 380 Q 470 384 485 384" stroke="#0F1B2D" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M 315 360 Q 385 365 450 380 Q 470 384 485 384" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Lower-right arm (to "Owner") -->
+          <path d="M 308 410 Q 365 445 430 470 Q 455 478 472 478" stroke="#0F1B2D" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M 308 410 Q 365 445 430 470 Q 455 478 472 478" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+          <!-- ===== 6 OPEN HANDS (palms) holding labels ===== -->
+          <g fill="#FFFFFF" stroke="#0F1B2D" stroke-width="1.6">
+            <ellipse cx="80" cy="240" rx="11" ry="13"/>
+            <ellipse cx="75" cy="384" rx="11" ry="13"/>
+            <ellipse cx="88" cy="478" rx="11" ry="13"/>
+            <ellipse cx="480" cy="240" rx="11" ry="13"/>
+            <ellipse cx="485" cy="384" rx="11" ry="13"/>
+            <ellipse cx="472" cy="478" rx="11" ry="13"/>
+          </g>
+        </g>
+
+        <!-- ===== Role labels resting on each palm ===== -->
+        <g font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#0F1B2D">
+          <!-- left -->
+          <g transform="translate(80,212)">
+            <rect x="-52" y="-14" width="104" height="28" rx="14" fill="#fff" stroke="#16A34A" stroke-width="1.5"/>
+            <text text-anchor="middle" dy="4" data-i18n="hs.r1">Офіціант</text>
+          </g>
+          <g transform="translate(75,356)">
+            <rect x="-50" y="-14" width="100" height="28" rx="14" fill="#fff" stroke="#16A34A" stroke-width="1.5"/>
+            <text text-anchor="middle" dy="4" data-i18n="hs.r3">Бармен</text>
+          </g>
+          <g transform="translate(88,506)">
+            <rect x="-58" y="-14" width="116" height="28" rx="14" fill="#fff" stroke="#16A34A" stroke-width="1.5"/>
+            <text text-anchor="middle" dy="4" data-i18n="hs.r5">Менеджер</text>
+          </g>
+          <!-- right -->
+          <g transform="translate(480,212)">
+            <rect x="-46" y="-14" width="92" height="28" rx="14" fill="#fff" stroke="#16A34A" stroke-width="1.5"/>
+            <text text-anchor="middle" dy="4" data-i18n="hs.r2">Кухар</text>
+          </g>
+          <g transform="translate(485,356)">
+            <rect x="-48" y="-14" width="96" height="28" rx="14" fill="#fff" stroke="#16A34A" stroke-width="1.5"/>
+            <text text-anchor="middle" dy="4" data-i18n="hs.r4">Хостес</text>
+          </g>
+          <g transform="translate(472,506)">
+            <rect x="-50" y="-14" width="100" height="28" rx="14" fill="#fff" stroke="#16A34A" stroke-width="1.5"/>
+            <text text-anchor="middle" dy="4" data-i18n="hs.r6">Власник</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 2 — LEVEL -->
+<section id="level">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">02 · <span data-i18n="nav.level">Рівень керування</span></div>
+      <div class="strike-row">
+        <s data-i18n="b2.old">POS-програма для ресторану</s>
+        <span class="rarr">→</span>
+        <span class="new" data-i18n="b2.new">інший клас продукту</span>
+      </div>
+      <h2 class="section-h" data-i18n="b2.h">Новий рівень керування рестораном.</h2>
+      <p class="lede" data-i18n="b2.p1">Раніше у вас був облік і графіки з аналітикою. І ваша голова, яка мала зрозуміти, що з усім цим робити.</p>
+      <p class="lede" data-i18n="b2.p2">Тепер у вас є асистент, який знає про ресторан усе. Бачить кожну дію кожного співробітника. Допомагає їм у роботі. Вам підказує, що робити в складній ситуації. Прості ситуації розрулює сам.</p>
+    </div>
+
+    <div class="brain-base reveal">
+      <!-- Brain + foundation -->
+      <svg viewBox="0 0 980 620" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="foundGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFFFFF"/>
+            <stop offset="100%" stop-color="#F7F8FA"/>
+          </linearGradient>
+          <radialGradient id="brainGlow2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#22C55E" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#22C55E" stop-opacity="0"/>
+          </radialGradient>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#16A34A"/>
+          </marker>
+        </defs>
+
+        <!-- Foundation: ROUGH grey slab — no rounding, coarse stone vibe -->
+        <g>
+          <!-- main slab -->
+          <rect x="100" y="430" width="780" height="170" fill="#D7DCE3" stroke="#7E8696" stroke-width="2"/>
+          <!-- top highlight band -->
+          <rect x="100" y="430" width="780" height="6" fill="#C2C8D2"/>
+          <!-- bottom shadow band -->
+          <rect x="100" y="594" width="780" height="6" fill="#A2A9B6"/>
+          <!-- carved horizontal lines -->
+          <g stroke="#B6BCC8" stroke-width="1" opacity="0.7">
+            <line x1="108" y1="450" x2="872" y2="450"/>
+            <line x1="108" y1="588" x2="872" y2="588"/>
+          </g>
+          <!-- chiselled corner notches -->
+          <path d="M 100 430 L 112 430 L 100 442 Z" fill="#A2A9B6"/>
+          <path d="M 880 430 L 868 430 L 880 442 Z" fill="#A2A9B6"/>
+          <path d="M 100 600 L 112 600 L 100 588 Z" fill="#A2A9B6"/>
+          <path d="M 880 600 L 868 600 L 880 588 Z" fill="#A2A9B6"/>
+
+          <!-- Title -->
+          <text x="130" y="472" font-family="Inter, sans-serif" font-size="12" font-weight="800" fill="#4A5566" letter-spacing="1.6" data-i18n="b2.found.eyebrow">ШАР 00 · ФУНДАМЕНТ</text>
+          <text x="130" y="503" font-family="Inter, sans-serif" font-size="22" font-weight="800" fill="#0F1B2D" data-i18n="b2.found.title">Система обліку — само собою.</text>
+
+          <!-- Foundation items -->
+          <g font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#0F1B2D">
+            <g>
+              <rect x="130" y="525" width="108" height="44" fill="#EEF1F5" stroke="#7E8696" stroke-width="1.2"/>
+              <text x="184" y="552" text-anchor="middle" data-i18n="b2.f1">Меню</text>
+            </g>
+            <g>
+              <rect x="248" y="525" width="108" height="44" fill="#EEF1F5" stroke="#7E8696" stroke-width="1.2"/>
+              <text x="302" y="552" text-anchor="middle" data-i18n="b2.f2">Склад</text>
+            </g>
+            <g>
+              <rect x="366" y="525" width="108" height="44" fill="#EEF1F5" stroke="#7E8696" stroke-width="1.2"/>
+              <text x="420" y="552" text-anchor="middle" data-i18n="b2.f3">Списання</text>
+            </g>
+            <g>
+              <rect x="484" y="525" width="128" height="44" fill="#EEF1F5" stroke="#7E8696" stroke-width="1.2"/>
+              <text x="548" y="552" text-anchor="middle" data-i18n="b2.f4">Фіскалізація</text>
+            </g>
+            <g>
+              <rect x="622" y="525" width="118" height="44" fill="#EEF1F5" stroke="#7E8696" stroke-width="1.2"/>
+              <text x="681" y="552" text-anchor="middle" data-i18n="b2.f5">Каса / чеки</text>
+            </g>
+            <g>
+              <rect x="750" y="525" width="108" height="44" fill="#EEF1F5" stroke="#7E8696" stroke-width="1.2"/>
+              <text x="804" y="552" text-anchor="middle" data-i18n="b2.f6">Звіти</text>
+            </g>
+          </g>
+        </g>
+
+        <!-- Subtle shadow under the brain -->
+        <ellipse cx="490" cy="425" rx="150" ry="12" fill="#0F1B2D" opacity="0.08"/>
+
+        <!-- Glow behind brain -->
+        <circle cx="490" cy="270" r="200" fill="url(#brainGlow2)"/>
+
+        <!-- Brain -->
+        <g class="brain-pulse" transform="translate(490,270)">
+          <path d="M-110 -20
+                   C -130 -70, -80 -120, -30 -115
+                   C -20 -135, 20 -135, 30 -115
+                   C 80 -120, 130 -70, 110 -20
+                   C 130 20, 120 70, 70 90
+                   C 60 115, 10 120, 0 105
+                   C -10 120, -60 115, -70 90
+                   C -120 70, -130 20, -110 -20 Z"
+                fill="#E9F7EF" stroke="#16A34A" stroke-width="2.4"/>
+          <path d="M 0 -120 C -4 -80, 4 -40, 0 0 C -4 40, 4 80, 0 110"
+                stroke="#16A34A" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M -95 -40 C -75 -55, -55 -50, -40 -35" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M -100 -5 C -75 -20, -45 -15, -20 -5" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M -95 30 C -70 15, -40 20, -15 30" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M -80 60 C -55 50, -30 55, -10 65" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M -55 -75 C -35 -85, -15 -85, 0 -70" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M 95 -40 C 75 -55, 55 -50, 40 -35" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M 100 -5 C 75 -20, 45 -15, 20 -5" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M 95 30 C 70 15, 40 20, 15 30" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M 80 60 C 55 50, 30 55, 10 65" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M 55 -75 C 35 -85, 15 -85, 0 -70" stroke="#16A34A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <text x="0" y="-135" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#16A34A" letter-spacing="1.4" data-i18n="b2.layer1">ШАР 01 · ІНТЕЛЕКТ</text>
+        </g>
+
+        <!-- Arrows from brain to role labels -->
+        <g fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round">
+          <!-- to Офіціант (top-left) -->
+          <path class="arrow-path" d="M 400 210 Q 280 170, 190 150" marker-end="url(#ah2)"/>
+          <!-- to Кухар (top-right) -->
+          <path class="arrow-path" d="M 580 210 Q 700 170, 790 150" marker-end="url(#ah2)" style="animation-delay:-.4s"/>
+          <!-- to Бармен (left) -->
+          <path class="arrow-path" d="M 370 270 L 220 270" marker-end="url(#ah2)" style="animation-delay:-.8s"/>
+          <!-- to Хостес (right) -->
+          <path class="arrow-path" d="M 610 270 L 760 270" marker-end="url(#ah2)" style="animation-delay:-1.2s"/>
+          <!-- to Google (bottom-left) — sixth arrow -->
+          <path class="arrow-path" d="M 400 340 Q 280 380, 200 395" marker-end="url(#ah2)" style="animation-delay:-1.6s"/>
+          <!-- to Власник (bottom-right) -->
+          <path class="arrow-path" d="M 580 340 Q 700 380, 800 395" marker-end="url(#ah2)" style="animation-delay:-2s"/>
+        </g>
+
+        <!-- Role labels with verbs -->
+        <g font-family="Inter, sans-serif">
+          <g transform="translate(80,125)">
+            <rect width="150" height="52" rx="12" fill="#fff" stroke="#E6EAF0" stroke-width="1.5"/>
+            <text x="14" y="22" font-size="11" font-weight="700" fill="#16A34A" letter-spacing=".8" data-i18n="b2.v1">ПІДКАЗУЄ →</text>
+            <text x="14" y="40" font-size="15" font-weight="700" fill="#0F1B2D" data-i18n="b2.w1">Офіціанту</text>
+          </g>
+          <g transform="translate(750,125)">
+            <rect width="160" height="52" rx="12" fill="#fff" stroke="#E6EAF0" stroke-width="1.5"/>
+            <text x="14" y="22" font-size="11" font-weight="700" fill="#16A34A" letter-spacing=".8" data-i18n="b2.v2">ПЕРЕДАЄ →</text>
+            <text x="14" y="40" font-size="15" font-weight="700" fill="#0F1B2D" data-i18n="b2.w2">Кухарю</text>
+          </g>
+          <g transform="translate(60,245)">
+            <rect width="160" height="52" rx="12" fill="#fff" stroke="#E6EAF0" stroke-width="1.5"/>
+            <text x="14" y="22" font-size="11" font-weight="700" fill="#16A34A" letter-spacing=".8" data-i18n="b2.v3">ПОПЕРЕДЖАЄ →</text>
+            <text x="14" y="40" font-size="15" font-weight="700" fill="#0F1B2D" data-i18n="b2.w3">Бармена</text>
+          </g>
+          <g transform="translate(760,245)">
+            <rect width="160" height="52" rx="12" fill="#fff" stroke="#E6EAF0" stroke-width="1.5"/>
+            <text x="14" y="22" font-size="11" font-weight="700" fill="#16A34A" letter-spacing=".8" data-i18n="b2.v4">КОНТРОЛЮЄ →</text>
+            <text x="14" y="40" font-size="15" font-weight="700" fill="#0F1B2D" data-i18n="b2.w4">Хостес</text>
+          </g>
+          <g transform="translate(750,370)">
+            <rect width="178" height="52" rx="12" fill="#fff" stroke="#E6EAF0" stroke-width="1.5"/>
+            <text x="14" y="22" font-size="11" font-weight="700" fill="#16A34A" letter-spacing=".8" data-i18n="b2.v5">ДОПОВІДАЄ І РАДИТЬ →</text>
+            <text x="14" y="40" font-size="15" font-weight="700" fill="#0F1B2D" data-i18n="b2.w5">Власнику</text>
+          </g>
+          <g transform="translate(40,370)">
+            <rect width="168" height="52" rx="12" fill="#fff" stroke="#E6EAF0" stroke-width="1.5"/>
+            <text x="14" y="22" font-size="11" font-weight="700" fill="#16A34A" letter-spacing=".8" data-i18n="b2.v6">ВІДПОВІДАЄ →</text>
+            <text x="14" y="40" font-size="15" font-weight="700" fill="#0F1B2D" data-i18n="b2.w6">на Google картах</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Mobile-only replacement for the brain illustration -->
+    <div class="brain-mobile">
+      <div class="bm-layer">
+        <div class="bm-eyebrow" data-i18n="b2.layer1">ШАР 01 · ІНТЕЛЕКТ</div>
+        <div class="bm-title">AI-асистент</div>
+        <ul class="bm-roles">
+          <li class="bm-role"><span class="bm-verb" data-i18n="b2.v1">ПІДКАЗУЄ →</span><span class="bm-who" data-i18n="b2.w1">Офіціанту</span></li>
+          <li class="bm-role"><span class="bm-verb" data-i18n="b2.v2">ПЕРЕДАЄ →</span><span class="bm-who" data-i18n="b2.w2">Кухарю</span></li>
+          <li class="bm-role"><span class="bm-verb" data-i18n="b2.v3">ПОПЕРЕДЖАЄ →</span><span class="bm-who" data-i18n="b2.w3">Бармена</span></li>
+          <li class="bm-role"><span class="bm-verb" data-i18n="b2.v4">КОНТРОЛЮЄ →</span><span class="bm-who" data-i18n="b2.w4">Хостес</span></li>
+          <li class="bm-role"><span class="bm-verb" data-i18n="b2.v5">ДОПОВІДАЄ →</span><span class="bm-who" data-i18n="b2.w5">Власнику</span></li>
+          <li class="bm-role"><span class="bm-verb" data-i18n="b2.v6">ВІДПОВІДАЄ →</span><span class="bm-who" data-i18n="b2.w6">на Google картах</span></li>
+        </ul>
+      </div>
+      <div class="bm-foundation">
+        <div class="bm-eyebrow" data-i18n="b2.found.eyebrow">ШАР 00 · ФУНДАМЕНТ</div>
+        <div class="bm-title" data-i18n="b2.found.title">Система обліку — само собою.</div>
+        <div class="bm-chips">
+          <span class="bm-chip" data-i18n="b2.f1">Меню</span>
+          <span class="bm-chip" data-i18n="b2.f2">Склад</span>
+          <span class="bm-chip" data-i18n="b2.f3">Списання</span>
+          <span class="bm-chip" data-i18n="b2.f4">Фіскалізація</span>
+          <span class="bm-chip" data-i18n="b2.f5">Каса / чеки</span>
+          <span class="bm-chip" data-i18n="b2.f6">Звіти</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 3 — ACTION -->
+<section id="action" style="background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">03 · <span data-i18n="nav.action">Від цифр до дій</span></div>
+      <h2 class="section-h" data-i18n="b3.h">Від цифр — до дій.</h2>
+      <p class="lede" data-i18n="b3.p1">Стандартна програма показує графіки. Далі — ваша робота: подивитися, зрозуміти, вирішити, що робити.</p>
+      <p class="lede" data-i18n="b3.p2">Асистент робить цю роботу за вас.</p>
+    </div>
+
+    <div class="rungs reveal">
+      <div class="rung">
+        <div class="rn"><b>01</b><span data-i18n="b3.s1">Цифри</span></div>
+        <h4 data-i18n="b3.h1">Спостереження</h4>
+        <p class="body" data-i18n="b3.q1">Маржа по стравах впала на 8% за тиждень.</p>
+      </div>
+      <div class="rung">
+        <div class="rn"><b>02</b><span data-i18n="b3.s2">Пояснення</span></div>
+        <h4 data-i18n="b3.h2">Причина</h4>
+        <p class="body" data-i18n="b3.q2">Зростання ціни на курку в постачальника A на 23%.</p>
+      </div>
+      <div class="rung">
+        <div class="rn"><b>03</b><span data-i18n="b3.s3">Варіанти</span></div>
+        <h4 data-i18n="b3.h3">Рішення</h4>
+        <p class="body" data-i18n="b3.q3">Перейти на постачальника B (–18%), підняти ціну на 10%, або залишити — різниця $120/міс.</p>
+      </div>
+      <div class="rung">
+        <div class="rn"><b>04</b><span data-i18n="b3.s4">Дія</span></div>
+        <h4 data-i18n="b3.h4">Виконання</h4>
+        <p class="body" data-i18n="b3.q4">«Перейти на постачальника B» — переведу закупівлі, повідомлю шефа, перерахую техкарти.</p>
+      </div>
+    </div>
+
+    <p class="rung-closer reveal"><span data-i18n="b3.c1">Асистент не просто звітує. Він</span> <em data-i18n="b3.c2">думає і діє</em> — <span data-i18n="b3.c3">з вашого підтвердження.</span></p>
+    <a class="btn btn-green reveal" href="#" id="demo-cta" target="_blank" rel="noopener" style="margin-top:24px">
+      <span data-i18n="b3.cta">Подивіться самі — демо-версія вже працює</span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- BLOCK 4 — MIRROR -->
+<section id="mirror">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">04 · <span data-i18n="nav.mirror">Дзеркало</span></div>
+      <h2 class="section-h" data-i18n="b4.h">А зараз цю роботу робите ви самі.</h2>
+      <p class="lede" data-i18n="b4.p">У своїй голові. 18 годин на добу.</p>
+    </div>
+
+    <div class="mirror-grid reveal">
+      <div class="q-card"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><p class="q-text" data-i18n="b4.q1">Чому столик 7 чекає десерт 20 хвилин?</p></div>
+      <div class="q-card"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div><p class="q-text" data-i18n="b4.q2">Де сьогодні списали 2 кіло курки?</p></div>
+      <div class="q-card"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><p class="q-text" data-i18n="b4.q3">Нова офіціантка вже знає склад страв?</p></div>
+      <div class="q-card"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><p class="q-text" data-i18n="b4.q4">Скільки я сьогодні заробив — і чому менше, ніж учора?</p></div>
+      <div class="q-card"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0zM12 8v4l3 2"/></svg></div><p class="q-text" data-i18n="b4.q5">На відгук у Google ще ніхто не відповів?</p></div>
+      <div class="q-card"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p class="q-text" data-i18n="b4.q6">Постійний гість давно не заходив — скільки вже?</p></div>
+    </div>
+    <p class="mirror-closer"><span data-i18n="b4.closer1">Це нормально.</span> <b data-i18n="b4.closer2">Але не обов'язково.</b></p>
+  </div>
+</section>
+
+<!-- BLOCK 5 — VIDEO -->
+<section id="video" style="background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">05 · <span data-i18n="nav.video">Практика</span></div>
+      <h2 class="section-h" data-i18n="b5.h">Приклади з практики.</h2>
+      <p class="lede" data-i18n="b5.p">Подивіться, як це працює в живому ресторані.</p>
+    </div>
+
+    <div class="video-card reveal">
+      <div class="video-wrap">
+        <!-- VIDEO URL: заказчик вставляє YouTube embed URL для кожної мови -->
+        <!-- <iframe src="https://www.youtube.com/embed/VIDEO_ID" title="Demo" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
+        <div class="video-placeholder">
+          <div class="play" onclick="this.parentElement.parentElement.innerHTML='<div style=\'color:#B8C5D9;padding:24px\'>video embed placeholder — customer to insert YouTube URL</div>'">
+            <svg width="32" height="32" viewBox="0 0 32 32"><polygon points="11,8 24,16 11,24" fill="#0F1B2D"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="video-meta">
+        <span data-i18n="b5.caption">~2–3 хвилини · Як Brain проводить зміну</span>
+        <span data-i18n="b5.captionr">UA · EN</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 6 — ROLES -->
+<section id="roles">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">06 · <span data-i18n="nav.roles">Ролі</span></div>
+      <h2 class="section-h" data-i18n="b6.h">Шість ролей в одному асистенті.</h2>
+    </div>
+    <div class="roles6 reveal" id="roles-grid"></div>
+    <div class="roles-closer"><span data-i18n="b6.closer1">Живий адміністратор. Живий контролер. Живий менеджер. Плюс ще троє.</span> <b data-i18n="b6.closer2">Асистент робить роботу кожного — у міру потреби.</b></div>
+  </div>
+</section>
+
+<!-- BLOCK 7 — PRICE -->
+<section id="price" style="background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">07 · <span data-i18n="nav.price">Ціна</span></div>
+      <h2 class="section-h" data-i18n="b7.h">Не порівнюйте з програмою. Порівнюйте із зарплатною відомістю.</h2>
+    </div>
+
+    <div class="price-card reveal">
+      <div class="price-left">
+        <div class="plabel" data-i18n="b7.tag">Базова ціна</div>
+        <div class="price-main">
+          <span class="p">€30</span>
+          <span class="u" data-i18n="b7.unit">кожен співробітник / місяць</span>
+        </div>
+        <p class="price-desc" data-i18n="b7.p1">€30 за кожного співробітника, якого ви підключаєте: офіціанти, кухарі, бармени, менеджери.</p>
+        <p class="price-desc" data-i18n="b7.p2">Ми не продаємо вам ще одну підписку. Ми даємо вашому ресторану ще одного співробітника — заступника, який знає все і працює цілодобово. Ціна того помічника, якого ви все одно не можете собі дозволити в штат.</p>
+      </div>
+      <div class="price-right">
+        <span class="discount-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 12V4H12"/><path d="M4 20L20 4"/></svg>
+          <span data-i18n="b7.disc">–50% ДЛЯ ВАС</span>
+        </span>
+        <h3 data-i18n="b7.rh">Скидка 50% для тих, хто записується зараз.</h3>
+        <div class="price-compare">
+          <span class="old">€30</span>
+          <span class="arr">→</span>
+          <span class="now">€15 <span data-i18n="b7.nowunit">/ співробітник / міс</span></span>
+        </div>
+        <p class="price-note" data-i18n="b7.rp">На весь перший рік роботи. Тільки для тих, хто в списку очікування.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 8 — LAUNCH -->
+<section id="launch">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">08 · <span data-i18n="nav.launch">Запуск</span></div>
+      <h2 class="section-h" data-i18n="b8.h">Запуск — одна хвилина. Налаштування — просто розмова.</h2>
+    </div>
+
+    <div class="launch-grid">
+      <div class="launch-main reveal">
+        <p data-i18n="b8.p1">Жодного складного впровадження. Жодних тижнів навчання команди. Жодного «ми вам налаштуємо».</p>
+        <p data-i18n="b8.p2">Завантажуєте — і одразу починаєте працювати. Асистент сам запитає вас про все, що йому потрібно знати.</p>
+        <ul class="ask-list">
+          <li class="done"><span class="n">✓</span><span data-i18n="b8.a1">Назва й формат ресторану</span></li>
+          <li class="done"><span class="n">✓</span><span data-i18n="b8.a2">Меню, страви, рецепти</span></li>
+          <li><span class="n">3</span><span data-i18n="b8.a3">Імена й ролі співробітників</span></li>
+          <li><span class="n">4</span><span data-i18n="b8.a4">Правила роботи, регламенти</span></li>
+          <li><span class="n">5</span><span data-i18n="b8.a5">Постачальники, закупівлі</span></li>
+        </ul>
+        <p style="margin-top:20px" data-i18n="b8.p3">Ви розмовляєте з ним голосом або текстом. Чим більше розкажете на початку, тим швидше він стане корисним. Далі він сам запам'ятовує кожну подію й стає розумнішим щодня.</p>
+      </div>
+      <div class="workstation reveal">
+        <h3 data-i18n="b8.wsh">І не тільки ресторатору. На кожному робочому місці — свій асистент.</h3>
+        <p data-i18n="b8.wsp1">Новий офіціант виходить у зал — і того ж дня (не наступного) починає приймати замовлення. Асистент веде його крок за кроком: нагадує, підказує, поправляє.</p>
+        <p data-i18n="b8.wsp2">Кухарю на станції — свій помічник. Барменові — свій. Хостес — свій.</p>
+        <div class="ws-big"><em data-i18n="b8.big1">Один мозок,</em> <span data-i18n="b8.big2">багато рук.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 9 — FAQ -->
+<section id="faq" style="background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">09 · <span data-i18n="nav.faq">FAQ</span></div>
+      <h2 class="section-h" data-i18n="b9.h">Часті запитання.</h2>
+    </div>
+    <div class="faq reveal" id="faq-list"></div>
+  </div>
+</section>
+
+<!-- BLOCK 10 — ROADMAP -->
+<section id="roadmap">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">10 · <span data-i18n="nav.roadmap">Roadmap</span></div>
+      <h2 class="section-h" data-i18n="b10.h">Чекайте найближчих анонсів.</h2>
+      <p class="lede" data-i18n="b10.p">У розробці просто зараз:</p>
+    </div>
+
+    <div class="roadmap reveal">
+      <div class="road-item"><span class="rtag" data-i18n="b10.t1">Гості</span><h4 data-i18n="b10.r1h">Робота з гостями й лояльність</h4><p data-i18n="b10.r1p">CRM, повернення постійних, персоналізовані акції.</p></div>
+      <div class="road-item"><span class="rtag" data-i18n="b10.t2">Сайт</span><h4 data-i18n="b10.r2h">Ваш сайт ресторану</h4><p data-i18n="b10.r2p">Автоматично збирається з даних системи: меню, бронювання, доставка.</p></div>
+      <div class="road-item"><span class="rtag" data-i18n="b10.t3">Логістика</span><h4 data-i18n="b10.r3h">Доставка й самовивіз</h4><p data-i18n="b10.r3p">Вбудована логіка + інтеграції з Glovo, Bolt Food та іншими.</p></div>
+      <div class="road-item"><span class="rtag" data-i18n="b10.t4">Бронювання</span><h4 data-i18n="b10.r4h">Автоматичне бронювання</h4><p data-i18n="b10.r4p">Асистент приймає бронь по телефону й повідомляє вам.</p></div>
+      <div class="road-item"><span class="rtag" data-i18n="b10.t5">Маркетинг</span><h4 data-i18n="b10.r5h">Маркетинг під ключ</h4><p data-i18n="b10.r5p">Налаштування реклами, аналітика, автогенерація контенту.</p></div>
+      <div class="road-item"><span class="rtag" data-i18n="b10.t6">Система</span><h4 data-i18n="b10.r6h">Усе — однією системою</h4><p data-i18n="b10.r6p">Не десяток сервісів, зшитих скотчем.</p></div>
+    </div>
+    <p class="road-closer" data-i18n="b10.closer">Все це — однією системою. Не десяток сервісів, зшитих скотчем.</p>
+  </div>
+</section>
+
+<!-- BLOCK 11 — ABOUT -->
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">11 · <span data-i18n="nav.about">Про нас</span></div>
+    </div>
+    <div class="about reveal">
+      <h2 data-i18n="b11.h">Ми знаємо ресторан зсередини.</h2>
+      <p data-i18n="b11.p1">Ми — команда, яка 17 років встановлювала стандартні ресторанні програми. Тисячі закладів, тисячі розмов об 11 вечора після останнього гостя. Ми знаємо ваші задачі й болі — не з книжок, а з кухні.</p>
+      <p class="em" data-i18n="b11.p2">Тому ми й представляємо вам це. Не чергову програму обліку (хоч облік всередині є). Мозок і нервову систему ресторану. Керування вашим бізнесом за допомогою штучного інтелекту.</p>
+      <div class="about-stats">
+        <div class="about-stat"><div class="big">17</div><div class="lbl" data-i18n="b11.s1">років у галузі</div></div>
+        <div class="about-stat"><div class="big">1000+</div><div class="lbl" data-i18n="b11.s2">встановлень</div></div>
+        <div class="about-stat"><div class="big">24/7</div><div class="lbl" data-i18n="b11.s3">досвід із кухні</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 12 — WAITLIST -->
+<section id="waitlist" style="background:#fff; border-top:1px solid var(--line);">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">12 · <span data-i18n="nav.waitlist">Waitlist</span></div>
+      <h2 class="section-h" data-i18n="b12.h">Запишіться в лист очікування.</h2>
+    </div>
+    <div class="waitlist reveal">
+      <div class="wl-left">
+        <h3 data-i18n="b12.lh">Продукт у фінальній стадії тестування. Запуск — у найближчі тижні.</h3>
+        <p data-i18n="b12.lp">Ті, хто запишеться зараз, отримають €15 за співробітника на місяць (замість €30) на весь перший рік роботи.</p>
+        <span class="wl-offer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 12V4H12"/><path d="M4 20L20 4"/></svg>
+          <span data-i18n="b12.offer">–50% · ПЕРШИЙ РІК</span>
+        </span>
+      </div>
+      <div class="wl-right">
+        <div class="wl-label" data-i18n="b12.label">Електронна пошта</div>
+        <form class="form" id="waitlist-form" novalidate>
+          <input type="email" name="email" required placeholder="name@restaurant.com" aria-label="Email"/>
+          <button type="submit"><span data-i18n="b12.btn">Записатися</span></button>
+        </form>
+        <p class="thanks" id="thanks" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+          <span data-i18n="b12.thanks">Дякуємо. Ми зафіксували вашу пошту й напишемо, коли запустимося.</span>
+        </p>
+        <p class="wl-note" data-i18n="b12.note">Одне поле. Жодних дзвінків. Листа надішлемо, коли буде що показати.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap finner">
+    <div>© 2026 Brain · <span data-i18n="footer.tag">AI-асистент для ресторатора</span></div>
+    <div><a href="mailto:hello@brain.restaurant">hello@brain.restaurant</a></div>
+  </div>
+</footer>
+
+<!-- Chat FAB — mirrors in-app assistant button -->
+<button class="fab" id="fab" aria-label="Chat">
+  <span class="dot"></span>
+  <span>
+    <span>Brain</span>
+    <span class="small" data-i18n="fab.sub">Ask anything</span>
+  </span>
+</button>
+<div class="fab-tip" id="fab-tip" data-i18n="fab.tip">Чат-бот скоро буде доступний</div>
+
+<script>
+const DICT = {
+  uk: {
+    "hero.eyebrow":"Для власників кафе та ресторанів",
+    "hero.h1":"AI-асистент для ресторатора",
+    "hero.h2":"Ваша права рука. Дуже розумна й дуже надійна.",
+    "hero.p1":"Працює 24/7. Знає про ваш ресторан усе — і допомагає керувати.",
+    "hero.p2":"Підказує персоналу в моменті. Складні ситуації розбирає сам. Вам приносить тільки головне.",
+    "hero.cta":"Подивіться, як він працює",
+    "hero.cta2":"Записатися",
+    "hero.t1a":"24/7","hero.t1b":"завжди на зміні",
+    "hero.t2a":"6","hero.t2b":"ролей в одному",
+    "hero.t3a":"17 років","hero.t3b":"у ресторанному софті",
+
+    "hs.r1":"Офіціант","hs.r2":"Кухар","hs.r3":"Бармен","hs.r4":"Хостес","hs.r5":"Менеджер","hs.r6":"Власник",
+
+    "nav.level":"Рівень керування","nav.action":"Від цифр до дій","nav.mirror":"Дзеркало","nav.video":"Практика","nav.roles":"Ролі","nav.price":"Ціна","nav.launch":"Запуск","nav.faq":"Часті запитання","nav.roadmap":"Roadmap","nav.about":"Про нас","nav.waitlist":"Waitlist",
+
+    "b2.old":"POS-програма",
+    "b2.new":"інший клас продукту",
+    "b2.h":"Новий рівень керування рестораном.",
+    "b2.p1":"Раніше у вас був облік і графіки з аналітикою. І ваша голова, яка мала зрозуміти, що з усім цим робити.",
+    "b2.p2":"Тепер у вас є асистент, який знає про ресторан усе. Бачить кожну дію кожного співробітника. Допомагає їм у роботі. Вам підказує, що робити в складній ситуації. Прості ситуації розрулює сам.",
+    "b2.layer1":"ШАР 01 · ІНТЕЛЕКТ",
+    "b2.found.eyebrow":"ШАР 00 · ФУНДАМЕНТ",
+    "b2.found.title":"Система обліку — само собою.",
+    "b2.f1":"Меню","b2.f2":"Склад","b2.f3":"Списання","b2.f4":"Фіскалізація","b2.f5":"Каса / чеки","b2.f6":"Звіти",
+    "b2.v1":"ПІДКАЗУЄ →","b2.w1":"Офіціанту",
+    "b2.v2":"ПЕРЕДАЄ →","b2.w2":"Кухарю",
+    "b2.v3":"ПОПЕРЕДЖАЄ →","b2.w3":"Бармена",
+    "b2.v4":"КОНТРОЛЮЄ →","b2.w4":"Хостес",
+    "b2.v5":"ДОПОВІДАЄ І РАДИТЬ →","b2.w5":"Власнику",
+    "b2.v6":"ВІДПОВІДАЄ →","b2.w6":"на Google картах",
+
+    "b3.h":"Від цифр — до дій.",
+    "b3.p1":"Стандартна програма показує графіки. Далі — ваша робота: подивитися, зрозуміти, вирішити, що робити.",
+    "b3.p2":"Асистент робить цю роботу за вас.",
+    "b3.s1":"Цифри","b3.s2":"Пояснення","b3.s3":"Варіанти","b3.s4":"Дія",
+    "b3.h1":"Спостереження","b3.h2":"Причина","b3.h3":"Рішення","b3.h4":"Виконання",
+    "b3.q1":"Маржа по стравах впала на 8% за тиждень.",
+    "b3.q2":"Зростання ціни на курку в постачальника A на 23%.",
+    "b3.q3":"Перейти на постачальника B (–18%), підняти ціну на 10%, або залишити — різниця $120/міс.",
+    "b3.q4":"«Перейти на постачальника B» — переведу закупівлі, повідомлю шефа, перерахую техкарти.",
+    "b3.c1":"Асистент не просто звітує. Він","b3.c2":"думає і діє","b3.c3":"з вашого підтвердження.",
+    "b3.cta":"Подивіться самі — демо-версія вже працює",
+
+    "b4.h":"А зараз цю роботу робите ви самі.",
+    "b4.p":"У своїй голові. 18 годин на добу.",
+    "b4.q1":"Чому столик 7 чекає десерт 20 хвилин?",
+    "b4.q2":"Де сьогодні списали 2 кіло курки?",
+    "b4.q3":"Нова офіціантка вже знає склад страв?",
+    "b4.q4":"Скільки я сьогодні заробив — і чому менше, ніж учора?",
+    "b4.q5":"На відгук у Google ще ніхто не відповів?",
+    "b4.q6":"Постійний гість давно не заходив — скільки вже?",
+    "b4.closer1":"Це нормально.","b4.closer2":"Але не обов'язково.",
+
+    "b5.h":"Приклади з практики.",
+    "b5.p":"Подивіться, як це працює в живому ресторані.",
+    "b5.caption":"~2–3 хвилини · Як Brain проводить зміну",
+    "b5.captionr":"UA · EN",
+
+    "b6.h":"Шість ролей в одному асистенті.",
+    "b6.closer1":"Живий адміністратор. Живий контролер. Живий менеджер. Плюс ще троє.",
+    "b6.closer2":"Асистент робить роботу кожного — у міру потреби.",
+
+    "b7.h":"Не порівнюйте з програмою. Порівнюйте із зарплатною відомістю.",
+    "b7.tag":"Базова ціна",
+    "b7.unit":"кожен співробітник / місяць",
+    "b7.p1":"€30 за кожного співробітника, якого ви підключаєте: офіціанти, кухарі, бармени, менеджери.",
+    "b7.p2":"Ми не продаємо вам ще одну підписку. Ми даємо вашому ресторану ще одного співробітника — заступника, який знає все і працює цілодобово. Ціна того помічника, якого ви все одно не можете собі дозволити в штат.",
+    "b7.disc":"–50% ДЛЯ ВАС",
+    "b7.rh":"Скидка 50% для тих, хто записується зараз.",
+    "b7.nowunit":"/ співробітник / міс",
+    "b7.rp":"На весь перший рік роботи. Тільки для тих, хто в списку очікування.",
+
+    "b8.h":"Запуск — одна хвилина. Налаштування — просто розмова.",
+    "b8.p1":"Жодного складного впровадження. Жодних тижнів навчання команди. Жодного «ми вам налаштуємо».",
+    "b8.p2":"Завантажуєте — і одразу починаєте працювати. Асистент сам запитає вас про все, що йому потрібно знати.",
+    "b8.a1":"Назва й формат ресторану","b8.a2":"Меню, страви, рецепти","b8.a3":"Імена й ролі співробітників","b8.a4":"Правила роботи, регламенти","b8.a5":"Постачальники, закупівлі",
+    "b8.p3":"Ви розмовляєте з ним голосом або текстом. Чим більше розкажете на початку, тим швидше він стане корисним. Далі він сам запам'ятовує кожну подію й стає розумнішим щодня.",
+    "b8.wsh":"І не тільки ресторатору. На кожному робочому місці — свій асистент.",
+    "b8.wsp1":"Новий офіціант виходить у зал — і того ж дня (не наступного) починає приймати замовлення. Асистент веде його крок за кроком: нагадує, підказує, поправляє.",
+    "b8.wsp2":"Кухарю на станції — свій помічник. Барменові — свій. Хостес — свій.",
+    "b8.big1":"Один мозок,","b8.big2":"багато рук.",
+
+    "b9.h":"Часті запитання.",
+
+    "b10.h":"Чекайте найближчих анонсів.",
+    "b10.p":"У розробці просто зараз:",
+    "b10.t1":"Гості","b10.r1h":"Робота з гостями й лояльність","b10.r1p":"CRM, повернення постійних, персоналізовані акції.",
+    "b10.t2":"Сайт","b10.r2h":"Ваш сайт ресторану","b10.r2p":"Автоматично збирається з даних системи: меню, бронювання, доставка.",
+    "b10.t3":"Логістика","b10.r3h":"Доставка й самовивіз","b10.r3p":"Вбудована логіка + інтеграції з Glovo, Bolt Food та іншими.",
+    "b10.t4":"Бронювання","b10.r4h":"Автоматичне бронювання","b10.r4p":"Асистент приймає бронь по телефону й повідомляє вам.",
+    "b10.t5":"Маркетинг","b10.r5h":"Маркетинг під ключ","b10.r5p":"Налаштування реклами, аналітика, автогенерація контенту.",
+    "b10.t6":"Система","b10.r6h":"Усе — однією системою","b10.r6p":"Не десяток сервісів, зшитих скотчем.",
+    "b10.closer":"Все це — однією системою. Не десяток сервісів, зшитих скотчем.",
+
+    "b11.h":"Ми знаємо ресторан зсередини.",
+    "b11.p1":"Ми — команда, яка 17 років встановлювала стандартні ресторанні програми. Тисячі закладів, тисячі розмов об 11 вечора після останнього гостя. Ми знаємо ваші задачі й болі — не з книжок, а з кухні.",
+    "b11.p2":"Тому ми й представляємо вам це. Не чергову програму обліку (хоч облік всередині є). Мозок і нервову систему ресторану. Керування вашим бізнесом за допомогою штучного інтелекту.",
+    "b11.s1":"років у галузі","b11.s2":"встановлень","b11.s3":"досвід із кухні",
+
+    "b12.h":"Запишіться в лист очікування.",
+    "b12.lh":"Продукт у фінальній стадії тестування. Запуск — у найближчі тижні.",
+    "b12.lp":"Ті, хто запишеться зараз, отримають €15 за співробітника на місяць (замість €30) на весь перший рік роботи.",
+    "b12.offer":"–50% · ПЕРШИЙ РІК",
+    "b12.label":"Електронна пошта",
+    "b12.btn":"Записатися",
+    "b12.thanks":"Дякуємо. Ми зафіксували вашу пошту й напишемо, коли запустимося.",
+    "b12.note":"Одне поле. Жодних дзвінків. Листа надішлемо, коли буде що показати.",
+
+    "fab.tip":"Чат-бот скоро буде доступний",
+    "fab.sub":"Запитайте будь-що",
+    "footer.tag":"AI-асистент для ресторатора"
+  },
+  en: {
+    "hero.eyebrow":"For café and restaurant owners",
+    "hero.h1":"AI assistant for restaurant owners",
+    "hero.h2":"Your right hand. Very smart. Very reliable.",
+    "hero.p1":"Works 24/7. Knows everything about your restaurant — and helps you run it.",
+    "hero.p2":"Guides your staff in real time. Handles routine situations on its own. Brings only what matters to you.",
+    "hero.cta":"See how it works",
+    "hero.cta2":"Join waitlist",
+    "hero.t1a":"24/7","hero.t1b":"always on shift",
+    "hero.t2a":"6","hero.t2b":"roles in one",
+    "hero.t3a":"17 years","hero.t3b":"in restaurant software",
+
+    "hs.r1":"Server","hs.r2":"Cook","hs.r3":"Bartender","hs.r4":"Host","hs.r5":"Manager","hs.r6":"Owner",
+
+    "nav.level":"Level","nav.action":"From numbers to action","nav.mirror":"Mirror","nav.video":"In practice","nav.roles":"Roles","nav.price":"Pricing","nav.launch":"Launch","nav.faq":"FAQ","nav.roadmap":"Roadmap","nav.about":"About","nav.waitlist":"Waitlist",
+
+    "b2.old":"POS software",
+    "b2.new":"a different class of product",
+    "b2.h":"A new level of running a restaurant.",
+    "b2.p1":"Until now, you had accounting and analytics dashboards. And your own head — which had to figure out what to do with all of it.",
+    "b2.p2":"Now you have an assistant that knows your restaurant inside and out. Sees every action of every employee. Helps them in their work. Tells you what to do when things get complex. Handles the simple stuff on its own.",
+    "b2.layer1":"LAYER 01 · INTELLIGENCE",
+    "b2.found.eyebrow":"LAYER 00 · FOUNDATION",
+    "b2.found.title":"Standard accounting — baked in.",
+    "b2.f1":"Menu","b2.f2":"Inventory","b2.f3":"Write-offs","b2.f4":"Fiscal","b2.f5":"POS / receipts","b2.f6":"Reports",
+    "b2.v1":"GUIDES →","b2.w1":"Server",
+    "b2.v2":"RELAYS →","b2.w2":"Cook",
+    "b2.v3":"ALERTS →","b2.w3":"Bartender",
+    "b2.v4":"MONITORS →","b2.w4":"Host",
+    "b2.v5":"REPORTS & ADVISES →","b2.w5":"Owner",
+    "b2.v6":"REPLIES →","b2.w6":"on Google Maps",
+
+    "b3.h":"From numbers — to action.",
+    "b3.p1":"A standard program shows you charts. The rest is your job: look, understand, decide what to do.",
+    "b3.p2":"The assistant does that job for you.",
+    "b3.s1":"Numbers","b3.s2":"Explanation","b3.s3":"Options","b3.s4":"Action",
+    "b3.h1":"Observation","b3.h2":"Cause","b3.h3":"Decision","b3.h4":"Execution",
+    "b3.q1":"Margin on dishes dropped 8% over the week.",
+    "b3.q2":"Chicken prices from supplier A went up 23%.",
+    "b3.q3":"Switch to supplier B (18% cheaper), raise prices 10%, or leave it — $120/month either way.",
+    "b3.q4":"“Switch to supplier B” — I'll update purchasing, notify the chef, and recalculate recipes.",
+    "b3.c1":"The assistant doesn't just report. It","b3.c2":"thinks and acts","b3.c3":"with your approval.",
+    "b3.cta":"See for yourself — a working demo is available",
+
+    "b4.h":"And right now, you're doing all of this yourself.",
+    "b4.p":"In your head. 18 hours a day.",
+    "b4.q1":"Why has table 7 been waiting 20 minutes for dessert?",
+    "b4.q2":"Where did 2 kilos of chicken get written off today?",
+    "b4.q3":"Does the new server know the ingredients yet?",
+    "b4.q4":"How much did I make today — and why less than yesterday?",
+    "b4.q5":"Has anyone replied to the new Google review yet?",
+    "b4.q6":"My regular hasn't been in for a while — how long has it been?",
+    "b4.closer1":"This is normal.","b4.closer2":"But it doesn't have to be.",
+
+    "b5.h":"Real-life examples.",
+    "b5.p":"See how it works in a real restaurant.",
+    "b5.caption":"~2–3 minutes · How Brain runs a shift","b5.captionr":"UA · EN",
+
+    "b6.h":"Six roles in one assistant.",
+    "b6.closer1":"A live manager. A live supervisor. A live guest-relations lead. Plus three more.",
+    "b6.closer2":"The assistant does the work of each — as needed.",
+
+    "b7.h":"Don't compare it to software. Compare it to your payroll.",
+    "b7.tag":"Base price",
+    "b7.unit":"per employee / month",
+    "b7.p1":"€30 per employee you connect: servers, cooks, bartenders, managers.",
+    "b7.p2":"This isn't another subscription. It's another employee for your restaurant — a deputy who knows everything and works around the clock. The cost of a helper you couldn't afford to hire full-time anyway.",
+    "b7.disc":"–50% FOR YOU",
+    "b7.rh":"50% off for everyone who signs up now.",
+    "b7.nowunit":"/ employee / mo",
+    "b7.rp":"For the entire first year. Only for those on the waiting list.",
+
+    "b8.h":"Launch in a minute. Setup is just a conversation.",
+    "b8.p1":"No complex rollout. No weeks of training. No “we'll set it up for you.”",
+    "b8.p2":"Load it — and start working right away. The assistant asks you everything it needs to know.",
+    "b8.a1":"Restaurant name and concept","b8.a2":"Menu, dishes, recipes","b8.a3":"Staff names and roles","b8.a4":"Rules and procedures","b8.a5":"Suppliers and purchasing",
+    "b8.p3":"You talk to it by voice or text. The more you tell it at the start, the sooner it becomes useful. After that, it records every event on its own and grows smarter every day.",
+    "b8.wsh":"And not just for the owner. Every workstation has its own assistant.",
+    "b8.wsp1":"A new server steps onto the floor — and starts taking orders the same day, not the next. The assistant walks them through every step: reminds, prompts, corrects.",
+    "b8.wsp2":"The cook has a helper at the station. The bartender has one. The host has one.",
+    "b8.big1":"One brain,","b8.big2":"many hands.",
+
+    "b9.h":"Frequently asked questions.",
+
+    "b10.h":"More coming soon.",
+    "b10.p":"In development right now:",
+    "b10.t1":"Guests","b10.r1h":"Guest relations and loyalty","b10.r1p":"CRM, bringing back regulars, personalized offers.",
+    "b10.t2":"Website","b10.r2h":"Your restaurant's website","b10.r2p":"Auto-generated from the system's data: menu, reservations, delivery.",
+    "b10.t3":"Logistics","b10.r3h":"Delivery and takeaway","b10.r3p":"Built-in logic + integrations with Glovo, Bolt Food, and others.",
+    "b10.t4":"Reservations","b10.r4h":"Automatic reservations","b10.r4p":"The assistant takes calls, books tables, and lets you know.",
+    "b10.t5":"Marketing","b10.r5h":"Turn-key marketing","b10.r5p":"Ad setup, performance analytics, automated content.",
+    "b10.t6":"System","b10.r6h":"All in one system","b10.r6p":"Not ten services duct-taped together.",
+    "b10.closer":"All of it — one system. Not ten services duct-taped together.",
+
+    "b11.h":"We know restaurants from the inside.",
+    "b11.p1":"We're the team that spent 17 years installing restaurant software in the real world. Thousands of locations. Thousands of late-night conversations after the last guest left. We know your problems and your workload — not from textbooks, but from the kitchen.",
+    "b11.p2":"That's why we're bringing you this. Not another accounting program (though yes, the accounting is built in). The brain and nervous system of your restaurant. Running your business with artificial intelligence.",
+    "b11.s1":"years in the field","b11.s2":"installations","b11.s3":"from the kitchen",
+
+    "b12.h":"Join the waiting list.",
+    "b12.lh":"The product is in its final testing phase. Launch — in the coming weeks.",
+    "b12.lp":"Sign up now and get €15 per employee per month (instead of €30) for the entire first year.",
+    "b12.offer":"–50% · FIRST YEAR",
+    "b12.label":"Email address",
+    "b12.btn":"Sign up",
+    "b12.thanks":"Thank you. We've saved your email and will reach out when we launch.",
+    "b12.note":"One field. No calls. We'll email when we have something to show.",
+
+    "fab.tip":"Chatbot coming soon",
+    "fab.sub":"Ask anything",
+    "footer.tag":"AI assistant for restaurant owners"
+  },
+  de: {
+    "hero.eyebrow":"Für Café- und Restaurantbesitzer",
+    "hero.h1":"KI-Assistent für Gastronomen",
+    "hero.h2":"Ihre rechte Hand. Sehr klug. Sehr verlässlich.",
+    "hero.p1":"Arbeitet rund um die Uhr. Kennt Ihr Restaurant in- und auswendig — und hilft Ihnen, es zu führen.",
+    "hero.p2":"Leitet Ihr Personal in Echtzeit. Erledigt Routinefälle selbst. Bringt Ihnen nur das Wesentliche.",
+    "hero.cta":"So funktioniert's",
+    "hero.cta2":"Vormerken",
+    "hero.t1a":"24/7","hero.t1b":"immer im Dienst",
+    "hero.t2a":"6","hero.t2b":"Rollen in einem",
+    "hero.t3a":"17 Jahre","hero.t3b":"Restaurant-Software",
+
+    "hs.r1":"Kellner","hs.r2":"Koch","hs.r3":"Barkeeper","hs.r4":"Empfang","hs.r5":"Manager","hs.r6":"Inhaber",
+
+    "nav.level":"Steuerung","nav.action":"Von Zahlen zu Taten","nav.mirror":"Spiegel","nav.video":"In der Praxis","nav.roles":"Rollen","nav.price":"Preis","nav.launch":"Start","nav.faq":"FAQ","nav.roadmap":"Roadmap","nav.about":"Über uns","nav.waitlist":"Warteliste",
+
+    "b2.old":"Kassensoftware",
+    "b2.new":"eine andere Produktklasse",
+    "b2.h":"Eine neue Ebene der Restaurantführung.",
+    "b2.p1":"Bisher hatten Sie Buchhaltung und Analyse-Dashboards. Und Ihren Kopf, der entscheiden musste, was damit zu tun ist.",
+    "b2.p2":"Jetzt haben Sie einen Assistenten, der Ihr Restaurant in- und auswendig kennt. Er sieht jede Handlung jedes Mitarbeiters. Er hilft ihnen bei der Arbeit. Er sagt Ihnen, was zu tun ist, wenn es kompliziert wird. Einfache Dinge erledigt er selbst.",
+    "b2.layer1":"EBENE 01 · INTELLIGENZ",
+    "b2.found.eyebrow":"EBENE 00 · FUNDAMENT",
+    "b2.found.title":"Buchhaltung — selbstverständlich integriert.",
+    "b2.f1":"Menü","b2.f2":"Lager","b2.f3":"Abschriften","b2.f4":"Fiskal","b2.f5":"Kasse / Bons","b2.f6":"Berichte",
+    "b2.v1":"FÜHRT →","b2.w1":"Kellner",
+    "b2.v2":"LEITET WEITER →","b2.w2":"Koch",
+    "b2.v3":"WARNT →","b2.w3":"Barkeeper",
+    "b2.v4":"ÜBERWACHT →","b2.w4":"Empfang",
+    "b2.v5":"BERICHTET & BERÄT →","b2.w5":"Inhaber",
+    "b2.v6":"ANTWORTET →","b2.w6":"auf Google Maps",
+
+    "b3.h":"Von Zahlen — zu Taten.",
+    "b3.p1":"Standardsoftware zeigt Ihnen Diagramme. Den Rest machen Sie: ansehen, verstehen, entscheiden, was zu tun ist.",
+    "b3.p2":"Der Assistent erledigt diese Arbeit für Sie.",
+    "b3.s1":"Zahlen","b3.s2":"Erklärung","b3.s3":"Optionen","b3.s4":"Aktion",
+    "b3.h1":"Beobachtung","b3.h2":"Ursache","b3.h3":"Entscheidung","b3.h4":"Ausführung",
+    "b3.q1":"Die Marge auf Gerichte ist diese Woche um 8% gefallen.",
+    "b3.q2":"Hähnchenpreis bei Lieferant A um 23% gestiegen.",
+    "b3.q3":"Auf Lieferant B wechseln (–18%), Preis um 10% erhöhen oder so lassen — Differenz 120 €/Monat.",
+    "b3.q4":"„Auf Lieferant B wechseln\" — ich stelle den Einkauf um, informiere den Küchenchef und rechne die Rezepte neu.",
+    "b3.c1":"Der Assistent berichtet nicht nur. Er","b3.c2":"denkt und handelt","b3.c3":"mit Ihrer Bestätigung.",
+    "b3.cta":"Selbst ansehen — die Demo ist verfügbar",
+
+    "b4.h":"Genau das machen Sie gerade alles selbst.",
+    "b4.p":"Im eigenen Kopf. 18 Stunden am Tag.",
+    "b4.q1":"Warum wartet Tisch 7 seit 20 Minuten auf das Dessert?",
+    "b4.q2":"Wo wurden heute 2 Kilo Hähnchen abgeschrieben?",
+    "b4.q3":"Kennt die neue Kellnerin schon die Zutaten?",
+    "b4.q4":"Wie viel habe ich heute verdient — und warum weniger als gestern?",
+    "b4.q5":"Hat schon jemand auf die neue Google-Rezension geantwortet?",
+    "b4.q6":"Mein Stammgast war länger nicht da — wie lange genau?",
+    "b4.closer1":"Das ist normal.","b4.closer2":"Aber es muss nicht so sein.",
+
+    "b5.h":"Beispiele aus der Praxis.",
+    "b5.p":"Sehen Sie, wie es in einem echten Restaurant funktioniert.",
+    "b5.caption":"~2–3 Min · Wie Brain eine Schicht führt","b5.captionr":"UA · EN",
+
+    "b6.h":"Sechs Rollen in einem Assistenten.",
+    "b6.closer1":"Ein lebendiger Manager. Ein lebendiger Kontrolleur. Ein lebendiger Gast-Coach. Plus drei weitere.",
+    "b6.closer2":"Der Assistent übernimmt jede Rolle — nach Bedarf.",
+
+    "b7.h":"Vergleichen Sie es nicht mit Software. Vergleichen Sie es mit der Lohnliste.",
+    "b7.tag":"Grundpreis",
+    "b7.unit":"pro Mitarbeiter / Monat",
+    "b7.p1":"30 € pro Mitarbeiter, den Sie anbinden: Kellner, Köche, Barkeeper, Manager.",
+    "b7.p2":"Das ist kein weiteres Abo. Das ist ein weiterer Mitarbeiter für Ihr Restaurant — ein Stellvertreter, der alles weiß und rund um die Uhr arbeitet. Der Preis einer Hilfskraft, die Sie sich sonst nie leisten könnten.",
+    "b7.disc":"–50% FÜR SIE",
+    "b7.rh":"50% Rabatt für alle, die sich jetzt eintragen.",
+    "b7.nowunit":"/ Mitarbeiter / Monat",
+    "b7.rp":"Für das gesamte erste Jahr. Nur für die Warteliste.",
+
+    "b8.h":"Start in einer Minute. Einrichtung ist einfach ein Gespräch.",
+    "b8.p1":"Keine komplizierte Einführung. Keine wochenlangen Schulungen. Kein „wir richten es für Sie ein\".",
+    "b8.p2":"Laden — und sofort loslegen. Der Assistent fragt selbst, was er wissen muss.",
+    "b8.a1":"Name und Format des Restaurants","b8.a2":"Menü, Gerichte, Rezepte","b8.a3":"Mitarbeiternamen und Rollen","b8.a4":"Regeln und Abläufe","b8.a5":"Lieferanten und Einkauf",
+    "b8.p3":"Sie sprechen oder schreiben mit ihm. Je mehr Sie zu Beginn erzählen, desto schneller wird er nützlich. Danach merkt er sich jedes Ereignis selbst und wird täglich klüger.",
+    "b8.wsh":"Und nicht nur für den Inhaber. Jeder Arbeitsplatz hat seinen eigenen Assistenten.",
+    "b8.wsp1":"Eine neue Kellnerin betritt den Raum — und nimmt schon am selben Tag, nicht erst am nächsten, Bestellungen auf. Der Assistent führt sie Schritt für Schritt: erinnert, zeigt, korrigiert.",
+    "b8.wsp2":"Der Koch hat seinen Helfer an der Station. Der Barkeeper hat seinen. Der Empfang hat seinen.",
+    "b8.big1":"Ein Gehirn,","b8.big2":"viele Hände.",
+
+    "b9.h":"Häufige Fragen.",
+
+    "b10.h":"Mehr kommt bald.",
+    "b10.p":"Gerade in Entwicklung:",
+    "b10.t1":"Gäste","b10.r1h":"Gästebeziehungen und Treue","b10.r1p":"CRM, Stammgäste zurückholen, persönliche Angebote.",
+    "b10.t2":"Website","b10.r2h":"Ihre Restaurant-Website","b10.r2p":"Automatisch aus Systemdaten erstellt: Menü, Reservierung, Lieferung.",
+    "b10.t3":"Logistik","b10.r3h":"Lieferung und Abholung","b10.r3p":"Eingebaute Logik + Integrationen mit Glovo, Bolt Food u. a.",
+    "b10.t4":"Reservierung","b10.r4h":"Automatische Reservierung","b10.r4p":"Der Assistent nimmt Anrufe entgegen, bucht Tische und informiert Sie.",
+    "b10.t5":"Marketing","b10.r5h":"Marketing schlüsselfertig","b10.r5p":"Werbe-Setup, Performance-Analyse, automatische Inhalte.",
+    "b10.t6":"System","b10.r6h":"Alles in einem System","b10.r6p":"Nicht zehn zusammengeklebte Dienste.",
+    "b10.closer":"Alles — ein System. Nicht zehn zusammengeklebte Dienste.",
+
+    "b11.h":"Wir kennen Restaurants von innen.",
+    "b11.p1":"Wir sind das Team, das 17 Jahre lang Restaurant-Software in der echten Welt installiert hat. Tausende Standorte. Tausende späte Gespräche nach dem letzten Gast. Wir kennen Ihre Probleme und Ihre Last — nicht aus Büchern, sondern aus der Küche.",
+    "b11.p2":"Deshalb bringen wir Ihnen das hier. Nicht noch eine Buchhaltungssoftware (obwohl die Buchhaltung natürlich integriert ist). Das Gehirn und Nervensystem Ihres Restaurants. Ihr Geschäft mit Hilfe künstlicher Intelligenz führen.",
+    "b11.s1":"Jahre in der Branche","b11.s2":"Installationen","b11.s3":"aus der Küche",
+
+    "b12.h":"Auf die Warteliste setzen.",
+    "b12.lh":"Das Produkt ist in der finalen Testphase. Start in den nächsten Wochen.",
+    "b12.lp":"Wer sich jetzt einträgt, zahlt 15 € pro Mitarbeiter pro Monat (statt 30 €) im gesamten ersten Jahr.",
+    "b12.offer":"–50% · ERSTES JAHR",
+    "b12.label":"E-Mail-Adresse",
+    "b12.btn":"Eintragen",
+    "b12.thanks":"Danke. Wir haben Ihre E-Mail gespeichert und melden uns zum Start.",
+    "b12.note":"Ein Feld. Keine Anrufe. Wir schreiben, wenn wir etwas zeigen können.",
+
+    "fab.tip":"Chatbot bald verfügbar",
+    "fab.sub":"Fragen Sie alles",
+    "footer.tag":"KI-Assistent für Gastronomen"
+  },
+  pl: {
+    "hero.eyebrow":"Dla właścicieli kawiarni i restauracji",
+    "hero.h1":"Asystent AI dla restauratora",
+    "hero.h2":"Twoja prawa ręka. Bardzo mądra. Bardzo niezawodna.",
+    "hero.p1":"Pracuje 24/7. Wie o Twojej restauracji wszystko — i pomaga Ci ją prowadzić.",
+    "hero.p2":"Podpowiada zespołowi w czasie rzeczywistym. Proste sytuacje załatwia sam. Tobie przekazuje tylko to, co istotne.",
+    "hero.cta":"Zobacz, jak to działa",
+    "hero.cta2":"Zapisz się",
+    "hero.t1a":"24/7","hero.t1b":"zawsze na zmianie",
+    "hero.t2a":"6","hero.t2b":"ról w jednym",
+    "hero.t3a":"17 lat","hero.t3b":"w oprogramowaniu dla gastronomii",
+
+    "hs.r1":"Kelner","hs.r2":"Kucharz","hs.r3":"Barman","hs.r4":"Hostessa","hs.r5":"Manager","hs.r6":"Właściciel",
+
+    "nav.level":"Poziom","nav.action":"Od liczb do działań","nav.mirror":"Lustro","nav.video":"W praktyce","nav.roles":"Role","nav.price":"Cena","nav.launch":"Start","nav.faq":"FAQ","nav.roadmap":"Roadmapa","nav.about":"O nas","nav.waitlist":"Lista oczekujących",
+
+    "b2.old":"oprogramowanie POS",
+    "b2.new":"inna klasa produktu",
+    "b2.h":"Nowy poziom zarządzania restauracją.",
+    "b2.p1":"Do tej pory miałeś księgowość i analityczne wykresy. I własną głowę, która musiała wymyślić, co z tym wszystkim zrobić.",
+    "b2.p2":"Teraz masz asystenta, który zna Twoją restaurację od podszewki. Widzi każde działanie każdego pracownika. Pomaga im w pracy. Mówi Ci, co robić, gdy sytuacja się komplikuje. Proste sprawy załatwia sam.",
+    "b2.layer1":"WARSTWA 01 · INTELIGENCJA",
+    "b2.found.eyebrow":"WARSTWA 00 · FUNDAMENT",
+    "b2.found.title":"Księgowość — wbudowana z definicji.",
+    "b2.f1":"Menu","b2.f2":"Magazyn","b2.f3":"Odpisy","b2.f4":"Fiskal","b2.f5":"Kasa / paragony","b2.f6":"Raporty",
+    "b2.v1":"PROWADZI →","b2.w1":"Kelnera",
+    "b2.v2":"PRZEKAZUJE →","b2.w2":"Kucharzowi",
+    "b2.v3":"OSTRZEGA →","b2.w3":"Barmana",
+    "b2.v4":"PILNUJE →","b2.w4":"Hostessę",
+    "b2.v5":"RAPORTUJE I DORADZA →","b2.w5":"Właścicielowi",
+    "b2.v6":"ODPOWIADA →","b2.w6":"na mapach Google",
+
+    "b3.h":"Od liczb — do działań.",
+    "b3.p1":"Standardowy program pokazuje wykresy. Reszta to Twoja praca: spojrzeć, zrozumieć, zdecydować.",
+    "b3.p2":"Asystent wykonuje tę pracę za Ciebie.",
+    "b3.s1":"Liczby","b3.s2":"Wyjaśnienie","b3.s3":"Opcje","b3.s4":"Działanie",
+    "b3.h1":"Obserwacja","b3.h2":"Przyczyna","b3.h3":"Decyzja","b3.h4":"Wykonanie",
+    "b3.q1":"Marża na daniach spadła o 8% w ciągu tygodnia.",
+    "b3.q2":"Cena kurczaka u dostawcy A wzrosła o 23%.",
+    "b3.q3":"Przejść do dostawcy B (–18%), podnieść cenę o 10% lub zostawić — różnica 120 €/mies.",
+    "b3.q4":"„Przejść do dostawcy B\" — przeniosę zakupy, powiadomię szefa kuchni, przeliczę receptury.",
+    "b3.c1":"Asystent nie tylko raportuje. On","b3.c2":"myśli i działa","b3.c3":"za Twoim potwierdzeniem.",
+    "b3.cta":"Zobacz sam — wersja demo już działa",
+
+    "b4.h":"A teraz całą tę pracę wykonujesz sam.",
+    "b4.p":"We własnej głowie. 18 godzin na dobę.",
+    "b4.q1":"Dlaczego stolik 7 czeka na deser już 20 minut?",
+    "b4.q2":"Gdzie dziś spisano 2 kilo kurczaka?",
+    "b4.q3":"Czy nowa kelnerka zna już skład dań?",
+    "b4.q4":"Ile dziś zarobiłem — i dlaczego mniej niż wczoraj?",
+    "b4.q5":"Czy ktoś odpowiedział na nową opinię w Google?",
+    "b4.q6":"Stały gość dawno nie był — ile to już?",
+    "b4.closer1":"To normalne.","b4.closer2":"Ale nie musi tak być.",
+
+    "b5.h":"Przykłady z praktyki.",
+    "b5.p":"Zobacz, jak to działa w prawdziwej restauracji.",
+    "b5.caption":"~2–3 minuty · Jak Brain prowadzi zmianę","b5.captionr":"UA · EN",
+
+    "b6.h":"Sześć ról w jednym asystencie.",
+    "b6.closer1":"Żywy manager. Żywy kontroler. Żywy opiekun gości. Plus jeszcze trzech.",
+    "b6.closer2":"Asystent wykonuje pracę każdego — w miarę potrzeby.",
+
+    "b7.h":"Nie porównuj z programem. Porównaj z listą płac.",
+    "b7.tag":"Cena podstawowa",
+    "b7.unit":"za pracownika / mies.",
+    "b7.p1":"30 € za każdego pracownika, którego podłączasz: kelnerów, kucharzy, barmanów, managerów.",
+    "b7.p2":"To nie kolejna subskrypcja. To kolejny pracownik dla Twojej restauracji — zastępca, który wie wszystko i pracuje całą dobę. Cena pomocnika, na którego i tak nie byłoby Cię stać na etat.",
+    "b7.disc":"–50% DLA CIEBIE",
+    "b7.rh":"50% zniżki dla wszystkich, którzy zapiszą się teraz.",
+    "b7.nowunit":"/ pracownik / mies.",
+    "b7.rp":"Przez cały pierwszy rok. Tylko dla osób z listy oczekujących.",
+
+    "b8.h":"Start w minutę. Konfiguracja to po prostu rozmowa.",
+    "b8.p1":"Bez skomplikowanego wdrożenia. Bez tygodni szkoleń. Bez „my Wam to ustawimy\".",
+    "b8.p2":"Wczytujesz — i od razu zaczynasz pracę. Asystent sam zapyta o wszystko, co musi wiedzieć.",
+    "b8.a1":"Nazwa i koncept restauracji","b8.a2":"Menu, dania, receptury","b8.a3":"Imiona i role pracowników","b8.a4":"Zasady i procedury","b8.a5":"Dostawcy i zakupy",
+    "b8.p3":"Rozmawiasz z nim głosem lub tekstem. Im więcej powiesz na początku, tym szybciej stanie się przydatny. Dalej sam zapamiętuje każde zdarzenie i z dnia na dzień jest mądrzejszy.",
+    "b8.wsh":"I nie tylko dla właściciela. Każde stanowisko ma własnego asystenta.",
+    "b8.wsp1":"Nowa kelnerka wchodzi na salę — i tego samego dnia, nie nazajutrz, zaczyna przyjmować zamówienia. Asystent prowadzi ją krok po kroku: przypomina, podpowiada, koryguje.",
+    "b8.wsp2":"Kucharz ma swojego pomocnika na stanowisku. Barman ma swojego. Hostessa ma swojego.",
+    "b8.big1":"Jeden mózg,","b8.big2":"wiele rąk.",
+
+    "b9.h":"Najczęstsze pytania.",
+
+    "b10.h":"Wkrótce więcej.",
+    "b10.p":"W trakcie tworzenia:",
+    "b10.t1":"Goście","b10.r1h":"Relacje z gośćmi i lojalność","b10.r1p":"CRM, powrót stałych gości, spersonalizowane oferty.",
+    "b10.t2":"Strona","b10.r2h":"Strona Twojej restauracji","b10.r2p":"Automatycznie składana z danych systemu: menu, rezerwacje, dostawa.",
+    "b10.t3":"Logistyka","b10.r3h":"Dostawa i odbiór osobisty","b10.r3p":"Wbudowana logika + integracje z Glovo, Bolt Food i innymi.",
+    "b10.t4":"Rezerwacje","b10.r4h":"Automatyczne rezerwacje","b10.r4p":"Asystent odbiera telefon, rezerwuje stolik i informuje Cię.",
+    "b10.t5":"Marketing","b10.r5h":"Marketing pod klucz","b10.r5p":"Konfiguracja reklam, analityka, automatyczne treści.",
+    "b10.t6":"System","b10.r6h":"Wszystko w jednym systemie","b10.r6p":"Nie dziesięć usług sklejonych taśmą.",
+    "b10.closer":"Wszystko — jeden system. Nie dziesięć usług sklejonych taśmą.",
+
+    "b11.h":"Znamy restaurację od środka.",
+    "b11.p1":"Jesteśmy zespołem, który przez 17 lat instalował oprogramowanie restauracyjne w realnym świecie. Tysiące lokali. Tysiące rozmów po jedenastej, po ostatnim gościu. Znamy Twoje problemy i obciążenia — nie z książek, lecz z kuchni.",
+    "b11.p2":"Dlatego przedstawiamy Ci to. Nie kolejny program księgowy (choć tak, księgowość jest w środku). Mózg i system nerwowy restauracji. Zarządzanie biznesem przy pomocy sztucznej inteligencji.",
+    "b11.s1":"lat w branży","b11.s2":"instalacji","b11.s3":"z kuchni",
+
+    "b12.h":"Zapisz się na listę oczekujących.",
+    "b12.lh":"Produkt jest w końcowej fazie testów. Start — w najbliższych tygodniach.",
+    "b12.lp":"Kto zapisze się teraz, dostanie 15 € za pracownika miesięcznie (zamiast 30 €) przez cały pierwszy rok.",
+    "b12.offer":"–50% · PIERWSZY ROK",
+    "b12.label":"Adres e-mail",
+    "b12.btn":"Zapisz się",
+    "b12.thanks":"Dziękujemy. Zapisaliśmy Twój e-mail i odezwiemy się przy starcie.",
+    "b12.note":"Jedno pole. Bez telefonów. Napiszemy, gdy będziemy mieli co pokazać.",
+
+    "fab.tip":"Chatbot wkrótce dostępny",
+    "fab.sub":"Zapytaj o cokolwiek",
+    "footer.tag":"Asystent AI dla restauratora"
+  }
+};
+
+const ROLES = {
+  uk: [
+    { t:"Ваше друге „я\"", b:"Бачить усе, що відбувається, і повідомляє тільки головне.", q:"Списання за тиждень — на 40% вище середнього. Причина: свіжа риба, не встигли реалізувати. Пропоную страву дня зі знижкою — збережемо маржу й оновимо меню." },
+    { t:"Асистент у кожного офіціанта", b:"У потрібний момент підказує склад страви, алергени, що запропонувати до замовлення.", q:"Новачок працює як досвідчений з першого дня. Досвідчений — швидше й точніше." },
+    { t:"Диспетчер між кухнею, баром і залом", b:"Ніхто нічого не забуває, ніхто нікого не шукає.", q:"Кухар оголосив стоп-лист — через 2 секунди знає вся зміна. Страва готова — офіціант отримує повідомлення без біганини на кухню." },
+    { t:"Контроль над усім, що відбувається", b:"Помічає те, що від вас вислизає: дивні патерни в чеках, забуті столи, часті списання „браку\".", q:"Доповідає раз на тиждень — і в будь-який момент на запит." },
+    { t:"Менеджер по роботі з гостями", b:"Бачить нові відгуки в Google і соцмережах, готує чернетки відповідей.", q:"Помічає, що постійний гість давно не приходив. Попереджає про скарги, які можуть вирости в скандал." },
+    { t:"Хранитель знань ресторану", b:"Техкарти, правила роботи, рецепти, скрипти — усе всередині системи.", q:"Шеф пішов — знання залишилися. Відкриваєте другий ресторан — усе переноситься туди." }
+  ],
+  en: [
+    { t:"Your second self", b:"Sees everything that happens and tells you only what matters.", q:"Waste this week is 40% above average. Main cause: fresh fish, unsold. I suggest a discounted dish of the day — keeps the margin, refreshes the menu." },
+    { t:"An assistant for every server", b:"At the right moment, tells them ingredients, allergens, what to suggest alongside an order.", q:"A new server performs like a pro from day one. An experienced one works faster and more precisely." },
+    { t:"Dispatcher between kitchen, bar, and floor", b:"No one forgets, no one hunts for anyone.", q:"The cook announces an out-of-stock item — two seconds later, the whole shift knows. A dish is ready — the server is notified without running to the kitchen." },
+    { t:"Full oversight of what's happening", b:"Catches what slips past you: odd patterns in checks, forgotten tables, too many ‘defective' write-offs.", q:"Reports weekly — and anytime you ask." },
+    { t:"Guest relations manager", b:"Watches new reviews on Google and social media, drafts replies.", q:"Notices when a regular hasn't been by in a while. Warns you about complaints that could turn into trouble." },
+    { t:"Keeper of restaurant knowledge", b:"Recipes, workflows, prep sheets, service scripts — all inside the system.", q:"If the chef leaves, the knowledge stays. If you open a second restaurant, it all transfers over." }
+  ],
+  de: [
+    { t:"Ihr zweites Ich", b:"Sieht alles, was passiert, und sagt Ihnen nur das Wesentliche.", q:"Abschriften diese Woche 40% über dem Durchschnitt. Hauptursache: frischer Fisch, nicht verkauft. Vorschlag: Tagesgericht mit Rabatt — Marge bleibt, Karte wirkt frisch." },
+    { t:"Ein Assistent für jeden Kellner", b:"Im richtigen Moment sagt er Zutaten, Allergene und was er zur Bestellung empfehlen soll.", q:"Ein neuer Kellner arbeitet ab dem ersten Tag wie ein Profi. Ein erfahrener — schneller und präziser." },
+    { t:"Disponent zwischen Küche, Bar und Service", b:"Niemand vergisst etwas, niemand sucht jemanden.", q:"Der Koch ruft eine Streichliste — zwei Sekunden später weiß es die ganze Schicht. Gericht fertig — der Kellner wird benachrichtigt, ohne in die Küche zu laufen." },
+    { t:"Volle Kontrolle über das Geschehen", b:"Erkennt, was Ihnen entgeht: seltsame Muster in Bons, vergessene Tische, zu häufige „Ausschuss\"-Abschriften.", q:"Berichtet wöchentlich — und jederzeit auf Nachfrage." },
+    { t:"Gäste-Beziehungsmanager", b:"Verfolgt neue Bewertungen bei Google und in sozialen Medien, formuliert Antworten.", q:"Bemerkt, wenn ein Stammgast länger nicht da war. Warnt vor Beschwerden, die zum Skandal werden könnten." },
+    { t:"Hüter des Restaurant-Wissens", b:"Rezepturen, Abläufe, Rezepte, Service-Skripte — alles im System.", q:"Geht der Küchenchef, bleibt das Wissen. Eröffnen Sie ein zweites Restaurant, wandert alles mit." }
+  ],
+  pl: [
+    { t:"Twoje drugie ja", b:"Widzi wszystko, co się dzieje, i mówi Ci tylko to, co istotne.", q:"Odpisy w tym tygodniu są o 40% wyższe od średniej. Główna przyczyna: świeża ryba, niesprzedana. Proponuję danie dnia ze zniżką — utrzymamy marżę i odświeżymy menu." },
+    { t:"Asystent dla każdego kelnera", b:"W odpowiednim momencie podpowiada skład dania, alergeny i co zaproponować do zamówienia.", q:"Nowy kelner pracuje jak doświadczony od pierwszego dnia. Doświadczony — szybciej i precyzyjniej." },
+    { t:"Dyspozytor między kuchnią, barem i salą", b:"Nikt o niczym nie zapomina, nikt nikogo nie szuka.", q:"Kucharz ogłasza stop-listę — po dwóch sekundach wie cała zmiana. Danie gotowe — kelner dostaje powiadomienie bez biegania do kuchni." },
+    { t:"Pełna kontrola nad tym, co się dzieje", b:"Wyłapuje to, co Ci umyka: dziwne wzorce w paragonach, zapomniane stoliki, zbyt częste odpisy „wadliwe\".", q:"Raportuje co tydzień — i w dowolnej chwili na żądanie." },
+    { t:"Manager relacji z gośćmi", b:"Śledzi nowe opinie w Google i mediach społecznościowych, przygotowuje odpowiedzi.", q:"Zauważa, że stały gość dawno nie był. Ostrzega przed skargami, które mogą urosnąć do problemu." },
+    { t:"Strażnik wiedzy restauracji", b:"Receptury, procedury, przepisy, skrypty obsługi — wszystko w systemie.", q:"Odejdzie szef kuchni — wiedza zostaje. Otworzysz drugą restaurację — wszystko się przeniesie." }
+  ]
+};
+
+const ROLE_ICONS = [
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>',
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>',
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>'
+];
+
+const FAQ = {
+  uk: [
+    ["Як усе це фіксується в базі? Це ж облік, це серйозно.",
+     "Асистент чує голос і розуміє, але в базу нічого не потрапляє без підтвердження людиною. Офіціант продиктував замовлення — бачить його на екрані, натискає кнопку підтвердження. Кухар каже „стіл 7 готовий\" — підтверджує кнопкою. Бармен списав пляшку — підтверджує кнопкою. До натискання — це чернетка. Після — жорсткий запис у базі, як у будь-якій серйозній системі обліку."],
+    ["А як я побачу, що у мене на складі, в касі, у звітах?",
+     "У будь-який момент. Класичні звіти — складські залишки, касові підсумки, виторг по днях, собівартість, маржа — на місці, всі. Як у будь-якій програмі обліку. Тільки зазвичай ви будете запитувати асистента голосом або текстом і отримувати коротку відповідь, а не копирсатися в таблицях."],
+    ["А якщо пропаде інтернет?",
+     "Система продовжить працювати. Локальний модуль тримає повну копію даних, все пишеться офлайн. Коли інтернет повернеться — синхронізація автоматично."],
+    ["А мікрофон мене постійно слухає?",
+     "Ні. Мікрофон вмикається тільки натисканням кнопки: натиснув — сказав — відпустив. Поза натисканням система нікого не чує."],
+    ["Мої дані не опиняться в інших ресторанів?",
+     "Ні. Дані кожного закладу повністю ізольовані. Ваші рецепти, ваші ціни, ваші гості — ваше."]
+  ],
+  en: [
+    ["How does all this get recorded? This is accounting — it's serious.",
+     "The assistant hears the voice and understands, but nothing goes into the database without human confirmation. A server dictates an order — sees it on the screen, taps confirm. A cook says “table 7 is ready” — taps confirm. A bartender writes off a bottle — taps confirm. Before the tap, it's a draft. After it, it's a firm entry — just like in any serious accounting system."],
+    ["How do I see my inventory, cash, and reports?",
+     "Anytime. All the standard reports — inventory levels, cash totals, daily sales, cost of goods, margin — are all there. Just like in any accounting program. Except usually, you'll just ask the assistant by voice or text and get a short answer, instead of digging through spreadsheets."],
+    ["What if the internet goes down?",
+     "The system keeps running. A local module holds a full copy of the data, everything writes offline. When the connection comes back, it syncs automatically."],
+    ["Is the microphone listening all the time?",
+     "No. The microphone only turns on when a button is pressed: press, speak, release. The rest of the time, it hears nothing."],
+    ["Will my data end up with other restaurants?",
+     "No. Each restaurant's data is fully isolated. Your recipes, your prices, your guests — yours."]
+  ],
+  de: [
+    ["Wie wird das alles in der Datenbank erfasst? Buchhaltung ist eine ernste Sache.",
+     "Der Assistent hört die Stimme und versteht sie, aber ohne menschliche Bestätigung gelangt nichts in die Datenbank. Der Kellner diktiert eine Bestellung — sieht sie auf dem Bildschirm, tippt auf Bestätigen. Der Koch sagt „Tisch 7 ist fertig\" — bestätigt per Knopf. Der Barkeeper schreibt eine Flasche ab — bestätigt per Knopf. Vor dem Tippen ist es ein Entwurf. Danach ein fester Eintrag — wie in jedem seriösen Buchhaltungssystem."],
+    ["Wie sehe ich Lager, Kasse und Berichte?",
+     "Jederzeit. Alle Standardberichte — Lagerbestände, Kassensummen, Tagesumsatz, Wareneinsatz, Marge — sind vorhanden. Wie in jedem Buchhaltungsprogramm. Nur fragen Sie meist den Assistenten per Stimme oder Text und bekommen eine kurze Antwort, statt in Tabellen zu wühlen."],
+    ["Was, wenn das Internet ausfällt?",
+     "Das System läuft weiter. Ein lokales Modul hält eine vollständige Kopie der Daten, alles wird offline geschrieben. Sobald die Verbindung zurück ist, synchronisiert es automatisch."],
+    ["Hört das Mikrofon ständig mit?",
+     "Nein. Das Mikrofon schaltet sich nur per Knopfdruck ein: drücken, sprechen, loslassen. Sonst hört es nichts."],
+    ["Landen meine Daten bei anderen Restaurants?",
+     "Nein. Die Daten jedes Lokals sind vollständig isoliert. Ihre Rezepte, Ihre Preise, Ihre Gäste — bleiben Ihre."]
+  ],
+  pl: [
+    ["Jak to wszystko jest zapisywane w bazie? To jest księgowość, sprawa poważna.",
+     "Asystent słyszy głos i rozumie, ale do bazy nic nie trafia bez potwierdzenia człowieka. Kelner dyktuje zamówienie — widzi je na ekranie, klika potwierdź. Kucharz mówi „stolik 7 gotowy\" — potwierdza przyciskiem. Barman odpisuje butelkę — potwierdza przyciskiem. Przed kliknięciem to wersja robocza. Po — twardy zapis w bazie, jak w każdym poważnym systemie księgowym."],
+    ["A jak zobaczę magazyn, kasę i raporty?",
+     "W dowolnym momencie. Klasyczne raporty — stany magazynowe, sumy kasowe, utarg dzienny, koszt własny, marża — wszystkie są. Jak w każdym programie księgowym. Tylko zwykle po prostu zapytasz asystenta głosem lub tekstem i dostaniesz krótką odpowiedź, zamiast grzebać w tabelach."],
+    ["A co, jeśli zniknie internet?",
+     "System działa dalej. Moduł lokalny trzyma pełną kopię danych, wszystko zapisuje się offline. Gdy łącze wróci — synchronizacja jest automatyczna."],
+    ["Mikrofon ciągle mnie podsłuchuje?",
+     "Nie. Mikrofon włącza się tylko po naciśnięciu przycisku: nacisnąłem — powiedziałem — puściłem. Poza naciśnięciem system nie słyszy nikogo."],
+    ["Czy moje dane trafią do innych restauracji?",
+     "Nie. Dane każdego lokalu są całkowicie odizolowane. Twoje receptury, Twoje ceny, Twoi goście — Twoje."]
+  ]
+};
+
+let currentLang = "uk";
+
+function applyLang(lang){
+  currentLang = lang;
+  const dict = DICT[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.getAttribute("data-i18n");
+    if (dict[k] !== undefined){
+      if (el.tagName === 'text' || el.tagName === 'TEXT') el.textContent = dict[k];
+      else el.textContent = dict[k];
+    }
+  });
+  document.querySelectorAll(".lang-menu button").forEach(b=>{
+    b.classList.toggle("on", b.getAttribute("data-lang")===lang);
+  });
+  // update trigger label + flag
+  const META = {
+    uk:{flag:"🇺🇦", label:"UA"},
+    en:{flag:"🇬🇧", label:"EN"},
+    de:{flag:"🇩🇪", label:"DE"},
+    pl:{flag:"🇵🇱", label:"PL"}
+  };
+  const m = META[lang] || META.en;
+  const tflag = document.getElementById("lang-current-flag");
+  const tlabel = document.getElementById("lang-current-label");
+  if (tflag) tflag.textContent = m.flag;
+  if (tlabel) tlabel.textContent = m.label;
+  try { localStorage.setItem("brain.lang", lang); } catch(e){}
+  renderRoles();
+  renderFAQ();
+  try { localStorage.setItem("brain.lang", lang); } catch(e){}
+}
+
+function renderRoles(){
+  const grid = document.getElementById("roles-grid");
+  const roles = ROLES[currentLang];
+  grid.innerHTML = roles.map((r, i)=>`
+    <article class="role-card">
+      <div class="role-head">
+        <span class="role-num">0${i+1} / 06</span>
+        <div class="role-ic">${ROLE_ICONS[i]}</div>
+      </div>
+      <h3>${r.t}</h3>
+      <p class="blurb">${r.b}</p>
+      <p class="quote">“${r.q}”</p>
+    </article>
+  `).join("");
+}
+
+function renderFAQ(){
+  const list = document.getElementById("faq-list");
+  const items = FAQ[currentLang];
+  list.innerHTML = items.map((qa,i)=>`
+    <div class="faq-item" data-i="${i}">
+      <button class="faq-q" aria-expanded="false">
+        <span class="qn">${String(i+1).padStart(2,"0")}</span>
+        <span class="qtext">${qa[0]}</span>
+        <span class="plus"></span>
+      </button>
+      <div class="faq-a"><div class="faq-a-inner">${qa[1]}</div></div>
+    </div>
+  `).join("");
+  list.querySelectorAll(".faq-item").forEach(item=>{
+    const btn = item.querySelector(".faq-q");
+    const ans = item.querySelector(".faq-a");
+    btn.addEventListener("click", ()=>{
+      const open = item.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open?"true":"false");
+      ans.style.maxHeight = open ? ans.scrollHeight + "px" : "0px";
+    });
+  });
+}
+
+(function initLang(){
+  let lang = null;
+  try { lang = localStorage.getItem("brain.lang"); } catch(e){}
+  if (!lang){
+    const al = (navigator.language||"").toLowerCase();
+    if (al.startsWith("uk") || al.startsWith("ru")) lang = "uk";
+    else if (al.startsWith("de")) lang = "de";
+    else if (al.startsWith("pl")) lang = "pl";
+    else lang = "en";
+  }
+  if (!DICT[lang]) lang = "en";
+  applyLang(lang);
+})();
+
+const langPicker = document.getElementById("lang-picker");
+const langTrigger = document.getElementById("lang-trigger");
+if (langTrigger){
+  langTrigger.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    const open = langPicker.classList.toggle("open");
+    langTrigger.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+}
+document.querySelectorAll(".lang-menu button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    applyLang(b.getAttribute("data-lang"));
+    langPicker.classList.remove("open");
+    langTrigger && langTrigger.setAttribute("aria-expanded","false");
+  });
+});
+document.addEventListener("click", (e)=>{
+  if (langPicker && !langPicker.contains(e.target)){
+    langPicker.classList.remove("open");
+    langTrigger && langTrigger.setAttribute("aria-expanded","false");
+  }
+});
+document.addEventListener("keydown", (e)=>{
+  if (e.key === "Escape" && langPicker){
+    langPicker.classList.remove("open");
+    langTrigger && langTrigger.setAttribute("aria-expanded","false");
+  }
+});
+
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+  });
+}, { rootMargin: "-40px 0px", threshold: 0.05 });
+document.querySelectorAll(".reveal").forEach(el=> io.observe(el));
+
+const fab = document.getElementById("fab");
+const fabTip = document.getElementById("fab-tip");
+fab.addEventListener("click", ()=>{
+  fabTip.classList.add("show");
+  clearTimeout(fab._t);
+  fab._t = setTimeout(()=> fabTip.classList.remove("show"), 2600);
+});
+
+const form = document.getElementById("waitlist-form");
+const thanks = document.getElementById("thanks");
+form.addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const email = form.email.value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ form.email.focus(); return; }
+  try {
+    const list = JSON.parse(localStorage.getItem("brain.waitlist")||"[]");
+    list.push({email, ts: Date.now(), lang: currentLang});
+    localStorage.setItem("brain.waitlist", JSON.stringify(list));
+  } catch(e){}
+  form.querySelector("input").disabled = true;
+  form.querySelector("button").disabled = true;
+  thanks.style.display = "flex";
+});
+</script>
+</body>
+</html>
